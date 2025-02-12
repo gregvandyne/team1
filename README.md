@@ -17,7 +17,24 @@ __Product Mock-Up:__ ![LitFlix_final](https://github.com/user-attachments/assets
 
 __Technologies & Resources:__ HTML, CSS, React, Javascript, SQL, Project Gutenberg (repository of every published work in public domain), Open Library (APIs for book/author search, book covers, etc.), LibriVox (audiobooks in the public domain), Google Books (API for preview/blurb page for each book)
 
-__Risks to project completion:__ Ensuring the proper scope of the project to allow for completion in a timely manner. 
+__Risks to project completion:__ 
+
+**Technical Risks**
+
+* Database Development and Scale Risks \- Some of the books that will be offered will have different formats or APIs to be integrated into the database. Additionally, there will be a large volume of books which carry a lot of information (data). Implementing these into a database collection along with user data may pose challenges.  
+* User Interface Complexity \- Building a Netflix like user interface with animations and various features will require some effort in the front end development which may be time-consuming  
+* Book Recommendation System \- .Building a program that provides recommendations to users based on previous past interest may require some advanced machine learning skills / algorithms and an advanced database system.  
+* Changes from external libraries \- As the project moves forward, an external library may change their formatting or APIs for access to their books. Adapting to these changes so the program is still functional may require monitoring or updates as the project continues.
+
+**Project Development Risks**
+
+* Resources (human, financial) \- With only four people, certain technical aspects may have to be learned by certain members with no previous experience. This may slow down implementation of certain features. Additionally, as more books, features, and users are added, the database will become more costly to maintain so lack of financial resources may become an issue.  
+* Project Scope Creep \- Many features and changes may be desired as the project goes on like addition of books or addition of certain features. Ensuring project scope is well defined and attainable before the project will be needed to allow for completion in a timely manner.
+
+**Legal & Security Risks**
+
+* Copyright Risks \- While this project focuses on books within the public domain, it will be important to ensure that books that are not in the public domain do not get put into the database as this can violate copyright and licensing laws.  
+* Security Risks \- Collecting reading history and preferences from users may be sensitive to some users and they do not want others knowing exactly what they like to read. Ensuring a secure database system that only the user has access to their own information will be critical in ensuring privacy.
 
 __Mitigation Strategy for above risks:__ 
 
@@ -38,13 +55,13 @@ Each team member will own specific parts of the project, so work moves in parall
 
 __Development method:__ We’re taking a hybrid approach, mixing Scrum (for structured sprints and regular check-ins) with Kanban (for visual task tracking and flexibility). Here’s how that plays out:
 
-Scrum Elements:
+**Scrum Elements:**
 Weekly Sprints → Every week, we set specific development goals and focus on completing them before moving on.
 Daily Standups → A short 5-10 min asynchronous check-in to update progress and flag any blockers.
 Sprint Reviews → At the end of each sprint, we review what’s done and adjust priorities if needed.
 Retrospectives → Every couple of weeks, we reflect on what’s working and improve our process.
 
-Kanban Elements: 
+**Kanban Elements:**
 Jira Board → A visual board showing all tasks (To Do, In Progress, Blocked, Done).
 Continuous Progress Updates → No rigid sprint deadlines for every little task—some things just flow better when done incrementally.
 Limit Work in Progress (WIP) → Too many open tasks = chaos. We’ll cap how many tasks each person can juggle at once.
