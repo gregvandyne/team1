@@ -5,7 +5,11 @@ __Team #:__ Team 1
 
 __Team/Product Name:__ Team 1 - Litflix
 
-__Team members:__ Talia Betourney (tebetourney, Talia.Betourney@colorado.edu), Greg Vandyne (gregvandyne, Greg.Vandyne@colorado.edu), Clayton Braden (claytonbraden, clayton.braden@colorado.edu), Jason Wells (<insert Github username>, jason.wells-1@colorado.edu)
+__Team members:__ 
+* Talia Betourney (tebetourney, Talia.Betourney@colorado.edu) 
+* Greg Vandyne (gregvandyne, Greg.Vandyne@colorado.edu)
+* Clayton Braden (claytonbraden, clayton.braden@colorado.edu)
+* Jason Wells (<insert Github username>, jason.wells-1@colorado.edu)
 
 __Day/Time/TimeZone for the scheduled team weekly meeting (30 minutes via Zoom):__ Mondays, 9-9:30am (MT)
 
@@ -38,19 +42,19 @@ __Risks to project completion:__
 
 __Mitigation Strategy for above risks:__ 
 
-1. Define the Scope Early 
+**1. Define the Scope Early:**
 We’ll outline exactly what LitFlix needs to do for the MVP (Minimum Viable Product) and make sure we don’t get sidetracked with unnecessary features. This means:
 Locking in core features upfront (book browsing, My Shelf, reading in-browser or EPUB download).
 Keeping a “Nice-to-Have” List for any extra features (audiobooks, advanced recommendations, etc.) we might tackle later.
 Using feedback loops to ensure we're on track rather than reworking things last minute.
 
-2. Reasonable Timelines, Not a Last-Minute Sprint
+**2. Reasonable Timelines, Not a Last-Minute Sprint:**
 Instead of cramming everything into the last few weeks, we’ll set deadlines for key milestones and hold ourselves accountable. That means:
 Breaking the project into smaller chunks (UI setup, API integration, user shelf, reading experience, etc.).
 Frequent check-ins to see what’s working and what’s stuck.
 Buffer time for unexpected roadblocks (because let’s be real, there will be some).
 
-3. Divide and Conquer
+**3. Divide and Conquer:**
 Each team member will own specific parts of the project, so work moves in parallel rather than bottlenecking at one person. We’ll also pair up for critical tasks like API integration, so we’re not relying on just one person to solve tricky issues.
 
 __Development method:__ We’re taking a hybrid approach, mixing Scrum (for structured sprints and regular check-ins) with Kanban (for visual task tracking and flexibility). Here’s how that plays out:
