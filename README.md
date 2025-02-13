@@ -9,7 +9,7 @@ __Team members:__
 * Talia Betourney (tebetourney, Talia.Betourney@colorado.edu) 
 * Greg Vandyne (gregvandyne, Greg.Vandyne@colorado.edu)
 * Clayton Braden (claytonbraden, clayton.braden@colorado.edu)
-* Jason Wells (<insert Github username>, jason.wells-1@colorado.edu)
+* Jason Wells (jawe4972, jason.wells-1@colorado.edu)
 
 __Day/Time/TimeZone for the scheduled team weekly meeting (30 minutes via Zoom):__ Mondays, 9-9:30am (MT)
 
