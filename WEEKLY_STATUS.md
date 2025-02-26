@@ -3,7 +3,8 @@
 ---
 **Status Report 1: Meeting from 2/27/2025**
 
-![Jira Weekly Status Report - Week 1](https://coding.csel.io/hub/user-redirect/lab/tree/CSPB3308/TeamProject/Jira_WeeklyStatus1.png)
+![Jira_WeeklyStatus1](https://github.com/user-attachments/assets/d7f44c28-75fd-414d-b126-a19baa335466)
+
 
 **Project Status at Start of Meeting:**  
 The project currently has designs for three of the four main landing pages of the website: *home*, *my shelf*, and *search results*. The base HTML, CSS, and JavaScript code for the *home* page has been written and is functional-- as much as is feasible without database connection. Team members have researched how we will integrate data from Project Gutenberg, as well as the APIs available from Open Library. Members report that the database has been migrated and the server is in a runnable state on local. 
