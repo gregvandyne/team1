@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Shelf</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="index.html" class="logo">LITFLIX</a>
+            <div class="search-container">
+                <input id="search-input" type="text" placeholder="Search by Genre, Author, ISBN">
+                <a href="searchPage.html" class="search-btn">🔍</a>
+            </div>
+            <a href="myShelf.html" class="my-shelf-btn">My Shelf</a>
+        </nav>
+    </header>
+    <main>
+        <div id="shelf-books" class="book-list"></div>
+    </main>
+
+    <!-- Modal for My Shelf Page -->
+    <div id="shelf-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <div class="modal-body">
+                <img id="shelf-book-image" src="" alt="Book Cover" class="modal-book-img">
+                <div class="modal-details">
+                    <h2 id="shelf-book-title"></h2>
+                    <p><strong>Author:</strong> <span id="shelf-book-author"></span></p>
+                    <p><strong>Genre:</strong> <span id="shelf-book-genre"></span></p>
+                    <p id="shelf-book-description"></p>
+                    <div class="modal-buttons">
+                        <button id="remove-from-shelf">Remove from My Shelf</button>
+                        <button id="download-shelf-book">Download</button>
+                        <button id="close-shelf-modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

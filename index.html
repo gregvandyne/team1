@@ -9,12 +9,12 @@
 <body>
     <header>
         <nav>
-            <a href="#" class="logo">LITFLIX</a>
+            <a href="index.html" class="logo">LITFLIX</a>
             <div class="search-container">
-                <input type="text" placeholder="Search by Genre, Author, ISBN">
-                <button class="search-btn">🔍</button>
+                <input id="search-input" type="text" placeholder="Search by Genre, Author, ISBN">
+                <a href="searchPage.html" class="search-btn">🔍</a>
             </div>
-            <button class="my-shelf-btn">My Shelf</button>
+            <a href="myshelf.html" class="my-shelf-btn">My Shelf</a>
         </nav>
     </header>
 
@@ -35,8 +35,6 @@
                 <h1>EDITOR'S PICKS</h1>
                 <p>Discover handpicked literary masterpieces selected by our editorial team.</p>
             </div>
-            <button class="nav-btn prev">&#10094;</button>
-            <button class="nav-btn next">&#10095;</button>
         </section>
 
         <section class="book-row">
@@ -118,6 +116,7 @@
                         <p><strong>Genre:</strong> <span id="book-genre"></span></p>
                         <p><strong>Description:</strong> <span id="book-description"></span></p>
                         <div class="modal-actions">
+                            <button id="add-to-shelf-btn">Add to My Shelf</button>
                             <button id="download-btn">Download</button>
                             <button id="close-modal">Close</button>
                         </div>
