@@ -16,10 +16,10 @@ Greg:
 Last week, Greg developed the initial HTML, CSS, and Javascript code for the *home* page. This week, he will use Talia's designs as reference to develop the base of the *my shelf* and *search results* pages. The *search results* page will be developed without the "Advanced Search" widget temporarily in order to allow other team members to provide a finalized design.
 
 Jason & Clayton:   
-In the last week, Jason and Clayton met to discuss database design and implementation. As stated above in Project Status, the database has been migrated and runs locally. 
+In the last week, Jason and Clayton met to discuss database design and implementation. As stated above in Project Status, the database has been migrated and runs locally. This includes a base database of 100 books (more can be added later) that includes book title, authors, gutenberg_id, URL for accessing book, and a cover image URL which scrapes from the HTML URL. More data fields such as description, subject, and download count, can be added fairly easily but will store only the main items to avoid data storage overhead.
 
 Jason:   
-This week, Jason will continue to assist Clayton in database implementation and management. He will also continue research on how to leverage our other API resources from Open Library. Jason will also begin to develop a list of feasible search categories for the "Advanced Search" widget. 
+This week, Jason will continue to assist Clayton in database implementation and management. He will also continue research on how to leverage our other API resources from Open Library. Jason will also begin to develop a list of feasible search categories for the "Advanced Search" widget. In addition, Jason is working on finding an optimal server to store the database that provides full functionality and low cost.
 
 Clayton:   
 Clayton will continue to develop the database implementation. He will begin integrating the data into Greg's code for the home page in order to test connections and database functionality. Clayton may also work together with Jason to brainstorm the necessary data to render each page. 
