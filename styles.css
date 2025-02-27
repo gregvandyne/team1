@@ -186,3 +186,73 @@ input[type="text"] {
 .book p {
     margin-top: 0.5rem;
 }
+
+/* Modal Styling */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+}
+
+.modal-content {
+    background-color: #222;
+    margin: 10% auto;
+    padding: 20px;
+    width: 33%;
+    border-radius: 10px;
+    color: #fff;
+    display: flex;
+    align-items: center;
+}
+
+.modal-body {
+    display: flex;
+    align-items: center;
+}
+
+.modal-book-image {
+    width: 180px;
+    height: 270px;
+    border-radius: 10px;
+    margin-right: 20px;
+}
+
+.book-details {
+    flex: 1;
+}
+
+.modal-actions {
+    margin-top: 20px;
+}
+
+.modal-actions button {
+    padding: 10px 15px;
+    margin-right: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#download-btn {
+    background-color: #e50914;
+    color: white;
+}
+
+#close-modal {
+    background-color: #444;
+    color: white;
+}
+
+.close {
+    color: #fff;
+    font-size: 30px;
+    cursor: pointer;
+    position: absolute;
+    top: 10px;
+    right: 15px;
+}

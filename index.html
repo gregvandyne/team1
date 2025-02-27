@@ -105,6 +105,27 @@
                 <div class="book"><img src="https://via.placeholder.com/180x270" alt="Educated"><p>Educated</p></div>
             </div>
         </section>
+
+        <!-- Modal Window -->
+        <div id="book-modal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <div class="modal-body">
+                    <img id="book-image" class="modal-book-image" src="" alt="Book Image">
+                    <div class="book-details">
+                        <h2 id="book-title"></h2>
+                        <p><strong>Author:</strong> <span id="book-author"></span></p>
+                        <p><strong>Genre:</strong> <span id="book-genre"></span></p>
+                        <p><strong>Description:</strong> <span id="book-description"></span></p>
+                        <div class="modal-actions">
+                            <button id="download-btn">Download</button>
+                            <button id="close-modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </main>
 
     <script src="script.js"></script>
