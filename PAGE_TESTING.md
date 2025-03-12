@@ -25,7 +25,8 @@
 
 ## Page 2
 - **Title:** Login
-- **Mock-up:** ![login](https://github.com/user-attachments/assets/4f29b31c-6a0e-4e35-bf1d-bffa23296932)
+- **Mock-up:** ![updated_login](https://github.com/user-attachments/assets/6f5a1493-b25f-4abd-9a45-9eafcd42c173)
+
 - **Description:** 
     The Login page allows users to access their accounts by entering their username and password. It is designed to be visually modern and user-friendly. The page includes fields for username and password, and provides error messages for failed login attempts. Upon successful login, users are redirected to the Home page. Upon a failed login attempt, the page pops up with a "Forgot Password" link that redirects users to the password recovery page.
 - **Required Parameters:** 
