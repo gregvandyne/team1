@@ -48,7 +48,8 @@
 
 ## Page 3
 - **Title:** My Shelf
-- **Mock-up:** ![myshelf](https://github.com/user-attachments/assets/1c6bf526-51d7-4c35-8b7f-0a6ebf2054ef) ![myshelf-widget](https://github.com/user-attachments/assets/c7b938ce-2621-49c2-9d73-a2b2abd3e7b6)
+- **Mock-up:** ![myshelf](https://github.com/user-attachments/assets/1c6bf526-51d7-4c35-8b7f-0a6ebf2054ef) ![updated_myshelf_widget](https://github.com/user-attachments/assets/a9d786d1-b4f2-400a-b708-7b291b180d51)
+
 - **Description:**
     The My Shelf page allows users to view and manage their personalized collection of saved books. The page displays the book covers in a grid layout. When a user clicks on a book, a panel pops up with detailed information about the book, including author details, publication information, and a "Read Now" button that allows the user to start reading the book immediately. The page also includes a "Remove from Shelf" button for each book, allowing users to manage their collection easily.
 - **Required Parameters:** 
