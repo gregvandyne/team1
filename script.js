@@ -127,3 +127,8 @@ document.addEventListener('DOMContentLoaded', () => {
         alert('Filters Applied! (Functionality can be added here)');
     });
 });
+
+// Function to navigate to different pages 
+function navigateTo(page) {
+    window.location.href = page;
+}

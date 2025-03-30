@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LitFlix - Featured</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="index.html" class="logo">LITFLIX</a>
+            <div class="search-container">
+                <input id="search-input" type="text" placeholder="Search by Genre, Author, ISBN">
+                <a href="searchPage.html" class="search-btn">🔍</a>
+            </div>
+            <a href="myshelf.html" class="my-shelf-btn">My Shelf</a>
+        </nav>
+    </header>
+
+    <main>
+        <section class="featured">
+            <h2>FEATURED</h2>
+            <div class="featured-content">
+                <div class="featured-author">
+                    <h3>FEATURED AUTHOR</h3>
+                    <div class="author-info">
+                        <div class="author-image">
+                            <img src="author-placeholder.jpg" alt="Author">
+                        </div>
+                        <div class="author-details">
+                            <h4>Author Name (Birth Yr - Death Yr)</h4>
+                            <p>
+                                Nam maximus at sem ut ultrices. Interdum et malesuada fames ac ante ipsum primis in faucibus.
+                            </p>
+                            <ul>
+                                <li>Title of work 1</li>
+                                <li>Title of work 2</li>
+                                <li>Title of work 3</li>
+                            </ul>
+                            <button onclick="navigateTo('searchPage.html')">Read Other Works</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="featured-collection">
+                    <h3>FEATURED COLLECTION</h3>
+                    <div class="collection-books">
+                        <img src="jane-eyre.jpg" alt="Jane Eyre">
+                        <img src="les-miserables.jpg" alt="Les Misérables">
+                        <img src="dracula.jpg" alt="Dracula">
+                        <img src="pride-and-prejudice.jpg" alt="Pride and Prejudice">
+                        <img src="great-gatsby.jpg" alt="The Great Gatsby">
+                    </div>
+                    <button onclick="navigateTo('collection.html')">See the Collection</button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
