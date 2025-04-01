@@ -403,60 +403,139 @@ input, select, button {
 }
 
 .featured {
+    padding-top: 100px;
     text-align: center;
     margin: 40px auto;
-    max-width: 900px;
+    max-width: 60%;
+}
+
+.featured-header {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #e50914;
 }
 
 .featured-content {
+    padding-top: 50px;
     display: flex;
     justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    gap: 50px;
 }
 
 .featured-author, .featured-collection {
     background: #333;
-    padding: 20px;
+    padding: 20px; 
     border-radius: 10px;
-    width: 48%;
-}
-
-.author-info {
+    width: 60%; 
+    height: 600px; /* Increase height for more content space */
+    position: relative; 
+    margin: 0 auto; /* Center the boxes horizontally */
     display: flex;
-    align-items: center;
+    flex-direction: column; 
+    justify-content: flex-start; /* Align content to the top */
+    gap: 10px; 
 }
 
-.author-image img {
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
+
+.featured-author h2, .featured-collection h2 {
+    font-size: 1.8rem;
+    color: white;
+    margin-bottom: 10px;
+    text-align: center;
 }
+
+
+.featured-author-content {
+    display: flex;
+    gap: 20px; 
+    flex: 1; 
+}
+
+
+.author-image {
+    flex: 1; /* Take up equal space */
+    max-width: 40%; 
+    height: auto;
+    border-radius: 8px;
+    object-fit: cover;
+}
+
 
 .author-details {
-    margin-left: 20px;
-}
-
-.author-details ul {
-    list-style: none;
-    padding: 0;
-}
-
-.author-details button,
-.featured-collection button {
-    background: #ff6600;
+    flex: 2; /* Take up more space than the image */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; 
     color: white;
-    padding: 8px 15px;
-    border: none;
-    cursor: pointer;
-    border-radius: 5px;
 }
+
+
+.author-titles {
+    margin-top: 5px;
+    list-style: none;
+    padding: 5px;
+    color: white;
+}
+
+.author-titles li {
+    padding: 5px;
+    margin-bottom: 5px;
+}
+
+
+.featured-collection-content {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* 3 images per row */
+    grid-gap: 15px; /* Space between images */
+    flex: 1; 
+    margin-top: 10px;
+}
+
 
 .collection-books img {
-    width: 60px;
-    height: 90px;
-    margin: 5px;
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
     transition: transform 0.3s ease;
 }
 
 .collection-books img:hover {
-    transform: scale(1.1);
+    transform: scale(1.05); 
+}
+
+
+.author-details button,
+.featured-collection button {
+    background: #e50914;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+    position: absolute;
+    bottom: 20px; /* Keep the button at the bottom */
+    right: 20px; /* Keep the button on the right side */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px; /* Add spacing between text and icon */
+    width: auto;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+/* Add an arrow icon using a pseudo-element */
+.author-details button::after,
+.featured-collection button::after {
+    content: '➔'; /* Unicode arrow character */
+    font-size: 1rem;
+    margin-left: 5px; 
+}
+
+/* Hover effect for buttons */
+.author-details button:hover,
+.featured-collection button:hover {
+    background: #ff1e2d;
+    transform: scale(1.05); 
 }
