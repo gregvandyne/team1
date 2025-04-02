@@ -25,3 +25,37 @@ This week, Jason will continue to assist Clayton in database implementation and 
 Clayton will continue to develop the database implementation. He will begin integrating the data into Greg's code for the home page in order to test connections and database functionality. Clayton may also work together with Jason to brainstorm the necessary data to render each page. 
 
 This report of status puts our team on track to meet the 03/13/2025 deadline to provide our Web Page Designs. We will discuss the necessary elements of Project Milestone 4 during our next weekly meeting to ensure task coverage.
+---
+
+**Status Report 2: Check-in from week of 03/03/2025**
+Team collectively decided to pause efforts on the Litflix group project for the week in order to focus on midterm exams. Development efforts will resume on 3/10.
+---
+
+**Status Report 3: Check-in from week of 03/10/2025**
+The team reviewed current project completion and designated tasks for the Web Page Designs project milestone. The division of tasks is as follows:
+
+Talia - Doc creation, page titles, design mock-ups, page descriptions, link destinations, parameters for render
+Greg - list of tests for render, necessary data for render
+Clayton - Revising/adding to data render and testing sections
+Jason - Revising/adding to data render and testing sections
+
+Regarding development, Clayton was able to set up database hosting on neon.tech and is uploading data for all of our necessary data points. Clayton will coordinate with Jason to implement additional necessary data points (book attributes, user login information, etc.)
+---
+
+**Status Report 4: Check-in from week of 03/17/2025**
+Talia:
+Talia developed initial code for the 'featured' general landing page, as well as the 'featured collection' page. They have been working to align the styling with the CSS already developed by Greg in order to establish a cohesive visual theme across the website. Talia is working to link the pages so that all destinatinations can be reached through user-click events instead of manual website path updates.  
+
+Clayton: 
+Clayton developed initial code for a 'login' and 'create account' page that links to the database via javascript. Clayton will coordinate with Jason to discuss how to route data to the 'search'page and any other concerns regarding the database. 
+---
+
+**Status Report 5: Check-in from week of 03/24/2025**
+Spring Break: Team paused development for the Spring Break holiday. Development efforts will resume 3/31.
+---
+
+**Status Report 6: Check-in from week of 03/31/2025**
+The team is developing the SQL design document for Project Milestone 5. Jason and Clayton are the database leads so they will take the primary role in document development. Talia and Greg will provide document revisions and support.
+
+Regarding development, Talia will be ensuring the Weekly Status document is updated with all meeting notes and reports of project progress. They will also be revising the 'featured collection' page and writing up the page text for the 'featured author' section of 'featured'. 
+---
