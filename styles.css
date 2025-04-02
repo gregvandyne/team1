@@ -5,6 +5,7 @@ body {
     padding: 0;
     background-color: #141414;
     color: #ffffff;
+    padding-top: 80px; /* Push content below the fixed header */
 }
 
 header {
@@ -538,4 +539,86 @@ input, select, button {
 .featured-collection button:hover {
     background: #ff1e2d;
     transform: scale(1.05); 
+}
+
+/* Collection Title Box */
+.collection-title .title-box {
+    background: #333;
+    color: white;
+    text-align: center;
+    padding: 20px;
+    border-radius: 10px;
+    margin: 20px auto;
+    max-width: 800px;
+    font-size: 1.9rem;
+    letter-spacing: 2px;
+}
+
+/* Collection Description */
+.collection-description {
+    text-align: center;
+    margin: 20px auto;
+    max-width: 800px;
+    padding: 10px;
+}
+
+.collection-description h2 {
+    font-size: 1.8rem;
+    color: #e50914;
+    margin-bottom: 10px;
+}
+
+.collection-description p {
+    font-size: 1rem;
+    line-height: 1.5;
+}
+
+/* Horizontal Divider */
+.divider {
+    border: none;
+    border-top: 2px solid #e50914; 
+    margin: 20px auto;
+    max-width: 800px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5); 
+}
+
+/* Collection Items Grid */
+.collection-items {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* Two columns */
+    gap: 50px; /* Space between items */
+    max-width: 800px;
+    margin: 20px auto;
+}
+
+/* Individual Book Item */
+.item {
+    background: #222;
+    border-radius: 10px;
+    overflow: hidden;
+    text-align: center;
+    padding: 10px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.item:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+}
+
+.item img {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+}
+
+.item-info h3 {
+    font-size: 1.2rem;
+    margin: 10px 0 5px;
+    color: #e50914;
+}
+
+.item-info p {
+    font-size: 1rem;
+    color: #ccc;
 }
