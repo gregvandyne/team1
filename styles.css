@@ -308,7 +308,7 @@ input[type="text"] {
     background-color: #1ed760;
 }
 
-.close {
+close {
     color: #fff;
     font-size: 28px;
     cursor: pointer;
@@ -430,15 +430,23 @@ input, select, button {
     padding: 20px; 
     border-radius: 10px;
     width: 60%; 
-    height: 600px; /* Increase height for more content space */
+    height: 600px; 
     position: relative; 
-    margin: 0 auto; /* Center the boxes horizontally */
+    margin: 0 auto; 
     display: flex;
     flex-direction: column; 
     justify-content: flex-start; /* Align content to the top */
     gap: 10px; 
 }
 
+
+.featured-author-title {
+    font-size: 2rem; 
+    font-weight: bold; 
+    color: #fff; 
+    margin-bottom: 5px; 
+    text-align: center; 
+}
 
 .featured-author h2, .featured-collection h2 {
     font-size: 1.8rem;
@@ -447,13 +455,23 @@ input, select, button {
     text-align: center;
 }
 
+/* Add a red dividing line under the h2 elements */
+.featured-author h2::after,
+.featured-collection h2::after {
+    content: '';
+    display: block;
+    width: 80%; /* Adjust width to stay within the box */
+    height: 1px; /* Thickness of the line */
+    background-color: #e50914; 
+    margin: 10px auto 0; 
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5); /* Add a subtle shadow */
+}
 
 .featured-author-content {
     display: flex;
     gap: 20px; 
     flex: 1; 
 }
-
 
 .author-image {
     flex: 1; /* Take up equal space */
@@ -468,32 +486,73 @@ input, select, button {
     flex: 2; /* Take up more space than the image */
     display: flex;
     flex-direction: column;
-    justify-content: space-between; 
+    justify-content: flex-start; /* Align content to the top */
+    gap: 10px; /* Add spacing between elements */
     color: white;
+    text-align: left;
 }
 
-
+/* Ensure the author-titles list is properly aligned */
 .author-titles {
-    margin-top: 5px;
-    list-style: none;
-    padding: 5px;
-    color: white;
+    margin-top: 10px; 
+    padding-left: 20px; 
+    list-style-type: disc; 
+    text-align: left; 
 }
 
 .author-titles li {
-    padding: 5px;
-    margin-bottom: 5px;
+    margin-bottom: 5px; 
+    font-size: 1rem; 
 }
 
+
+.author-titles li::marker {
+    color: #e50914; /* Change the color of the list point */
+}
 
 .featured-collection-content {
     display: grid;
-    grid-template-columns: repeat(3, 1fr); /* 3 images per row */
-    grid-gap: 15px; /* Space between images */
-    flex: 1; 
+    grid-template-columns: repeat(3, 1fr); /* Create 3 columns */
+    grid-gap: 15px; 
+    justify-items: center; 
+    align-items: center; 
     margin-top: 10px;
 }
 
+.featured-collection-content img {
+    width: 100%; /* Ensure images take up the full width of their container */
+    max-width: 150px; 
+    height: 200px; 
+    object-fit: cover; /* Ensure images maintain aspect ratio and fill the box */
+    border-radius: 8px; 
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3); 
+    transition: transform 0.3s ease; 
+}
+
+.featured-collection-content img:hover {
+    transform: scale(1.05); /* Slightly enlarge the image on hover */
+}
+
+.featured-collection-content {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* 3 columns */
+    grid-template-rows: auto auto; /* Two rows for images */
+    grid-gap: 15px; 
+    justify-items: center; 
+    align-items: center; 
+    position: relative;
+}
+
+.featured-collection-title {
+    grid-column: 1 / -1; /* Span the title across all columns */
+    grid-row: 2; /* Place the title between the first and second rows */
+    text-align: center; 
+    font-size: 1.5rem; 
+    font-weight: bold; 
+    color: #fff; 
+    margin: 10px 0; 
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7); 
+}
 
 .collection-books img {
     width: 100%;
@@ -505,7 +564,6 @@ input, select, button {
 .collection-books img:hover {
     transform: scale(1.05); 
 }
-
 
 .author-details button,
 .featured-collection button {
@@ -521,6 +579,7 @@ input, select, button {
     display: flex;
     align-items: center;
     justify-content: center;
+    font-weight: bold;
     gap: 8px; /* Add spacing between text and icon */
     width: auto;
     transition: background-color 0.3s ease, transform 0.2s ease;
@@ -552,6 +611,7 @@ input, select, button {
     max-width: 800px;
     font-size: 1.9rem;
     letter-spacing: 2px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
 }
 
 /* Collection Description */
@@ -571,6 +631,7 @@ input, select, button {
 .collection-description p {
     font-size: 1rem;
     line-height: 1.5;
+    text-align: left;
 }
 
 /* Horizontal Divider */
@@ -585,10 +646,25 @@ input, select, button {
 /* Collection Items Grid */
 .collection-items {
     display: grid;
-    grid-template-columns: repeat(2, 1fr); /* Two columns */
-    gap: 50px; /* Space between items */
+    grid-template-columns: repeat(3, 1fr); /* Three columns */
+    gap: 50px; 
     max-width: 800px;
     margin: 20px auto;
+}
+
+/* Standardize the size of images in the collection-items section */
+.collection-items img {
+    width: 100%; 
+    max-width: 150px; 
+    height: 200px; 
+    object-fit: cover; 
+    border-radius: 8px; 
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3); 
+    transition: transform 0.3s ease; 
+}
+
+.collection-items img:hover {
+    transform: scale(1.05); /* Slightly enlarge the image on hover */
 }
 
 /* Individual Book Item */
@@ -606,11 +682,6 @@ input, select, button {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
 }
 
-.item img {
-    width: 100%;
-    height: auto;
-    border-radius: 8px;
-}
 
 .item-info h3 {
     font-size: 1.2rem;
