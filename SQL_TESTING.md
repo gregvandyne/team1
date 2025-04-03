@@ -1,6 +1,8 @@
-# SQL Testing Documentation
+# Litflix (Team 1) - SQL Testing Documentation
 
-This document attempts to describe the database design and data access routines for our project. It includes details about three tables (along with their fields, constraints, and relationships) and the functions (queries) used to access that data. Sample tests of how the database will be validated are listed as well.
+**Purpose:** This document attempts to describe the database design and data access routines for our project, Litflix. It includes details about four tables (along with their fields, constraints, and relationships) and the functions (queries) used to access that data. Sample tests of how the database will be validated are listed as well.
+
+**Authors:** Talia Betourney, Greg Vandyne, Clayton Braden, and Jason Wells
 
 ## Tables
 
@@ -265,7 +267,7 @@ Verify Username, Email, and Password inserted into Database
 
 **Description:** 
 
-After creating an account with a username, email, and password. Database in
+After creating an account with a username, email, and password, the user data is successfully stored in the database.
 
 **Preconditions:**
 
@@ -283,7 +285,7 @@ After creating an account with a username, email, and password. Database in
 
 4. Verify that the screen is taken to the login page.
 
-**Expected result:** A message will pop up if the account was created successfully. The username, email, and a hased password should be inserted into the database and a userID assigned with the user
+**Expected result:** A message will pop up if the account was created successfully. The username, email, and a hashed password should be inserted into the database and a userID assigned with the user
 
 **Actual result** (when you are testing this, how can you tell it worked):
 
