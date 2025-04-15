@@ -1,0 +1,103 @@
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(to bottom, #333, #111);
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.login-container {
+    text-align: center;
+    background-color: rgba(0, 0, 0, 0.8);
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+    width: 300px;
+}
+
+.login-header h1 {
+    color:#e50914;
+    font-weight: bold;
+    font-size: 36px;
+    margin: 0;
+}
+
+.login-header p {
+    font-size: 14px;
+    margin: 5px 0 20px;
+    color: #ccc;
+}
+
+form input[type="text"], form input[type="password"], form input[type="email"] {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: none;
+    border-radius: 5px;
+    background: #222;
+    color: white;
+    font-size: 14px;
+}
+
+form input::placeholder {
+    color: #aaa;
+}
+
+.button-group {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+.button-group button {
+    width: 48%;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+#registerBtn {
+    background-color: #555;
+    color: white;
+}
+
+#registerBtn:hover {
+    background-color: #777;
+}
+
+form button[type="submit"] {
+    background-color: #444;
+    color: white;
+}
+
+form button[type="submit"]:hover {
+    background-color: #666;
+}
+
+.forgot-password {
+    margin-top: 20px;
+}
+
+.forgot-password a {
+    color: #ccc;
+    text-decoration: none;
+    font-size: 12px;
+}
+
+.forgot-password a:hover {
+    text-decoration: underline;
+}
+
+#backToLoginBtn {
+    background-color: #555;
+    color: white;
+}
+
+#backToLoginBtn:hover {
+    background-color: #777;
+}

@@ -1,34 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - LitFlix</title>
+    <link rel="stylesheet" href="../static/loginPage.css">
+</head>
 <body>
-    
-
-    <!-- Button to open the modal login form -->
-    <button id="loginBtn">Go To Login Page</button>
-
-    <!-- The Modal -->
-    <div id="loginBody" class="modal">
-        <span id="closeModal" class="close" title="Close Modal">&times;</span>
-
-        <!-- Modal Content -->
+    <div class="login-container">
+        <div class="login-header">
+            <h1>LITFLIX</h1>
+            <p>START READING</p>
+        </div>
         <form id="loginForm" action="/login" method="POST">
-
-            <div class="container">
-                <label for="uname"><b>Username</b></label>
-                <input type="text" placeholder="Enter Username" name="uname" required>
-
-                <label for="psw"><b>Password</b></label>
-                <input type="password" placeholder="Enter Password" name="psw" required>
-
+            <input type="text" placeholder="Username" name="uname" required>
+            <input type="password" placeholder="Password" name="psw" required>
+            <div class="button-group">
+                <button type="button" id="registerBtn" onclick="window.location.href='/createAccount'">Register</button>
                 <button type="submit">Login</button>
-                <label>
-                    <input type="checkbox" checked="checked" name="remember"> Remember me
-                </label>
             </div>
-
-            <div class="container" style="background-color:#f1f1f1">
-                <button type="button" id="cancelBtn" class="cancelbtn">Cancel</button>
-                <span class="psw">Forgot <a href="#">password?</a></span>
+            <div class="forgot-password">
+                <a href="/createAccount">Forgot password?</a>
             </div>
         </form>
     </div>
     <script src="../static/loginPage.js"></script>
 </body>
+</html>

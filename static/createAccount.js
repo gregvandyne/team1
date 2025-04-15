@@ -34,4 +34,7 @@ document.getElementById("createAccountForm").addEventListener("submit", async (e
     }
 });
 
-
+// Redirect back to login page for 'Back to Login' button
+document.getElementById("backToLoginBtn").addEventListener("click", () => {
+    window.location.href = "/loginPage";
+});
