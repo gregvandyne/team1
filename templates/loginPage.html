@@ -12,6 +12,12 @@
             <h1>LITFLIX</h1>
             <p>START READING</p>
         </div>
+        <!-- Display error msg if login is invalid -->
+        {% if error %}
+        <div class="error-message">
+            <p>{{ error }}</p>
+        </div>
+        {% endif %}
         <form id="loginForm" action="/login" method="POST">
             <input type="text" placeholder="Username" name="uname" required>
             <input type="password" placeholder="Password" name="psw" required>
