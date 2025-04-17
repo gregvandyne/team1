@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Shelf</title>
+    <title>Litflix - My Shelf</title>
     <link rel="stylesheet" href="../static/styles.css">
 </head>
 <body>
@@ -11,17 +11,28 @@
         <nav>
             <a href="/home" class="logo">LITFLIX</a>
             <div class="search-container">
-                <input id="search-input" type="text" placeholder="Search by Genre, Author, ISBN">
+                <input id="search-input" type="text" placeholder="Search by Author, Title, or Genre">
                 <a href="/searchPage" class="search-btn">🔍</a>
             </div>
             <a href="/myShelf" class="my-shelf-btn">My Shelf</a>
         </nav>
     </header>
     <main>
-        <div id="shelf-books" class="book-list"></div>
+        <h1 class="shelf-title">MY SHELF</h1>
+        <hr class="divider">
+        <div id="shelf-books" class="shelf-grid">
+            <!-- Example books for layout testing -->
+            <div class="book">
+                <img src="../static/crime_and_punishment.jpg" alt="Crime and Punishment">
+            </div>
+            <div class="book">
+                <img src="../static/dracula.jpg" alt="Dracula">
+            </div>
+            <!-- Add more books below this -->
+        </div>
     </main>
 
-    <!-- Modal for My Shelf Page -->
+    <!-- Modal for Book Details -->
     <div id="shelf-modal" class="modal">
         <div class="modal-content">
             <span class="close">&times;</span>
