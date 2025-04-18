@@ -33,56 +33,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Ensure modals are hidden initially
-    const bookModal = document.getElementById('book-modal');
-    const shelfModal = document.getElementById('shelf-modal');
-
-    if (bookModal) bookModal.style.display = 'none';
-    if (shelfModal) shelfModal.style.display = 'none';
-
-    // Function to open the correct modal when a book is clicked
-    document.querySelectorAll('.book').forEach(book => {
-        book.addEventListener('click', function (e) {
-            e.stopPropagation(); // Prevent unintended triggers
-
-            const isShelfPage = document.getElementById('shelf-books') !== null; // Detect if on My Shelf page
-            const modal = isShelfPage ? shelfModal : bookModal;
-            if (!modal) return;
-
-            modal.style.display = 'block';
-
-            // Determine which modal content to update
-            const prefix = isShelfPage ? 'shelf' : 'book';
-
-            document.getElementById(`${prefix}-book-image`).src = this.querySelector('img').src;
-            document.getElementById(`${prefix}-book-title`).textContent = this.querySelector('p').textContent;
-            document.getElementById(`${prefix}-book-author`).textContent = "Author Name"; // Replace with real data
-            document.getElementById(`${prefix}-book-genre`).textContent = "Genre"; // Replace with real data
-            document.getElementById(`${prefix}-book-description`).textContent = "This is a sample book description."; // Replace with real data
-        });
-    });
-
-    // Function to close modal
-    const closeModal = (modal) => {
-        if (modal) modal.style.display = 'none';
-    };
-
-    // Attach close event listeners for both modals
-    document.getElementById('close-modal')?.addEventListener('click', () => closeModal(bookModal));
-    document.getElementById('close-shelf-modal')?.addEventListener('click', () => closeModal(shelfModal));
-    document.querySelectorAll('.close').forEach(closeBtn =>
-        closeBtn.addEventListener('click', () => {
-            closeModal(bookModal);
-            closeModal(shelfModal);
-        })
-    );
-
-    // Close modal when clicking outside
-    window.addEventListener('click', (e) => {
-        if (e.target === bookModal) closeModal(bookModal);
-        if (e.target === shelfModal) closeModal(shelfModal);
-    });
-
     // Search Button Navigation
     const searchBtn = document.getElementById('search-btn');
     const searchInput = document.getElementById('search-input');
@@ -126,6 +76,48 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log(`Filters Applied:`, filters);
         alert('Filters Applied! (Functionality can be added here)');
     });
+
+    // Function to open the book modal
+    function openBookModal(title, author, genre, description = "No description available.", imageSrc = "") {
+        const modal = document.getElementById('shelf-modal') || document.getElementById('book-modal');
+        if (modal) {
+            const modalImage = modal.querySelector('.modal-book-img');
+            const modalTitle = modal.querySelector('#shelf-book-title') || modal.querySelector('#book-title');
+            const modalAuthor = modal.querySelector('#shelf-book-author') || modal.querySelector('#book-author');
+            const modalGenre = modal.querySelector('#shelf-book-genre') || modal.querySelector('#book-genre');
+            const modalDescription = modal.querySelector('#shelf-book-description') || modal.querySelector('#book-description');
+
+            // Populate modal with book details
+            if (modalImage) modalImage.src = imageSrc;
+            if (modalTitle) modalTitle.textContent = title;
+            if (modalAuthor) modalAuthor.textContent = author;
+            if (modalGenre) modalGenre.textContent = genre;
+            if (modalDescription) modalDescription.textContent = description;
+
+            // Display the modal
+            modal.style.display = 'flex';
+        }
+    }
+
+    // Function to close the book modal
+    function closeBookModal() {
+        const modal = document.getElementById('shelf-modal') || document.getElementById('book-modal');
+        if (modal) {
+            modal.style.display = 'none';
+        }
+    }
+
+    // Close modal when clicking outside of it
+    window.addEventListener('click', (e) => {
+        const modal = document.getElementById('shelf-modal') || document.getElementById('book-modal');
+        if (modal && e.target === modal) {
+            closeBookModal();
+        }
+    });
+
+    // Attach modal functions to global scope for inline `onclick` attributes
+    window.openBookModal = openBookModal;
+    window.closeBookModal = closeBookModal;
 });
 
 // Function to navigate to different pages 

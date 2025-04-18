@@ -22,10 +22,10 @@
         <hr class="divider">
         <div id="shelf-books" class="shelf-grid">
             <!-- Example books for layout testing -->
-            <div class="book">
+            <div class="book" onclick="openBookModal('Crime and Punishment', 'Fyodor Dostoevsky', 'Classic', 'A gripping tale of morality and redemption.', '../static/crime_and_punishment.jpg')">
                 <img src="../static/crime_and_punishment.jpg" alt="Crime and Punishment">
             </div>
-            <div class="book">
+            <div class="book" onclick="openBookModal('Dracula', 'Bram Stoker', 'Horror', 'A classic Gothic horror novel.', '../static/dracula.jpg')">
                 <img src="../static/dracula.jpg" alt="Dracula">
             </div>
             <!-- Add more books below this -->
@@ -35,7 +35,7 @@
     <!-- Modal for Book Details -->
     <div id="shelf-modal" class="modal">
         <div class="modal-content">
-            <span class="close">&times;</span>
+            <span class="close" onclick="closeBookModal()">&times;</span>
             <div class="modal-body">
                 <img id="shelf-book-image" src="" alt="Book Cover" class="modal-book-img">
                 <div class="modal-details">
@@ -44,9 +44,9 @@
                     <p><strong>Genre:</strong> <span id="shelf-book-genre"></span></p>
                     <p id="shelf-book-description"></p>
                     <div class="modal-buttons">
-                        <button id="remove-from-shelf">Remove from My Shelf</button>
-                        <button id="download-shelf-book">Download</button>
-                        <button id="close-shelf-modal">Close</button>
+                        <button id="remove-from-shelf">Remove from Shelf</button>
+                        <button id="read-now">Read Now</button>
+                        <button id="close-modal" onclick="closeBookModal()">Close</button>
                     </div>
                 </div>
             </div>
