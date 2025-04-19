@@ -300,3 +300,11 @@ async function removeBookFromShelf(bookId) {
         alert('An error occurred while removing the book from your shelf');
     }
 }
+
+
+document.addEventListener("DOMContentLoaded", () => {
+  const user = localStorage.getItem("currentUser");
+  if (user && window.location.pathname.includes("myShelf")) {
+    loadUserShelf(user);
+  }
+});
