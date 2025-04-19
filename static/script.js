@@ -147,46 +147,57 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Function to load user's shelf
 async function loadUserShelf(username) {
-    try {
-        const response = await fetch(`/api/my-shelf?username=${encodeURIComponent(username)}`);
-        const data = await response.json();
-        
-        if (data.success) {
-            const shelfContainer = document.getElementById('shelf-books');
-            shelfContainer.innerHTML = ''; // Clear existing books
-            
-            if (data.books.length === 0) {
-                shelfContainer.innerHTML = '<p>Your shelf is empty. Add books from our collection!</p>';
-                return;
-            }
-            
-            // Add each book to the shelf
-            data.books.forEach(book => {
-                const bookElement = document.createElement('div');
-                bookElement.className = 'book';
-                bookElement.onclick = () => openBookModal(
-                    book.bookTitle, 
-                    book.bookAuthor, 
-                    book.bookGenre, 
-                    book.bookDescription, 
-                    book.bookImageURL,
-                    book.bookID
-                );
-                
-                const img = document.createElement('img');
-                img.src = book.bookImageURL || '../static/placeholder_book.jpg';
-                img.alt = book.bookTitle;
-                
-                bookElement.appendChild(img);
-                shelfContainer.appendChild(bookElement);
-            });
-        } else {
-            console.error('Failed to load shelf:', data.message);
-        }
-    } catch (error) {
-        console.error('Error loading shelf:', error);
+  try {
+    const resp = await fetch(`/api/my-shelf?username=${encodeURIComponent(username)}`);
+    const data = await resp.json();
+    const shelf = document.getElementById('shelf-books');
+    shelf.innerHTML = ''; // clear placeholders
+
+    if (!data.success || data.books.length === 0) {
+      shelf.innerHTML = '<p>Your shelf is empty. Add some books!</p>';
+      return;
     }
+
+    data.books.forEach(book => {
+      // 1) Book container
+      const card = document.createElement('div');
+      card.className = 'book';
+
+      // 2) Cover image
+      const img = document.createElement('img');
+      img.src = book.bookimageurl || '/static/placeholder_book.jpg';
+      img.alt = book.booktitle;
+      card.appendChild(img);
+
+      // 3) Info block under cover
+      const info = document.createElement('div');
+      info.className = 'book-info';
+      info.innerHTML = `
+        <h3>${book.booktitle}</h3>
+        <p>Author: ${book.bookauthor}</p>
+        <p>Genre: ${book.bookgenre || '—'}</p>
+        <p>Downloads: ${book.downloadcount}</p>
+      `;
+      card.appendChild(info);
+
+      // 4) Click → open modal, pass downloadCount
+      card.onclick = () => openBookModal(
+        book.booktitle,
+        book.bookauthor,
+        book.bookgenre,
+        book.bookdescription,
+        book.bookimageurl,
+        book.bookid,
+        book.downloadcount
+      );
+
+      shelf.appendChild(card);
+    });
+  } catch (e) {
+    console.error('loadUserShelf error', e);
+  }
 }
+
 
 // Enhanced openBookModal function to handle book IDs
 function openBookModal(title, author, genre, description = "No description available.", imageSrc = "", bookId = null) {
