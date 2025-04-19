@@ -124,3 +124,165 @@ document.addEventListener('DOMContentLoaded', () => {
 function navigateTo(page) {
     window.location.href = page;
 }
+
+
+// Global variable to store current user
+let currentUser = null;
+
+// Set current user after login
+function setCurrentUser(username) {
+    currentUser = username;
+    localStorage.setItem('currentUser', username);
+}
+
+// Get current user from localStorage on page load
+document.addEventListener('DOMContentLoaded', () => {
+    currentUser = localStorage.getItem('currentUser');
+    
+    // If we're on the myShelf page and a user is logged in, load their books
+    if (window.location.pathname.includes('myShelf') && currentUser) {
+        loadUserShelf(currentUser);
+    }
+});
+
+// Function to load user's shelf
+async function loadUserShelf(username) {
+    try {
+        const response = await fetch(`/api/my-shelf?username=${encodeURIComponent(username)}`);
+        const data = await response.json();
+        
+        if (data.success) {
+            const shelfContainer = document.getElementById('shelf-books');
+            shelfContainer.innerHTML = ''; // Clear existing books
+            
+            if (data.books.length === 0) {
+                shelfContainer.innerHTML = '<p>Your shelf is empty. Add books from our collection!</p>';
+                return;
+            }
+            
+            // Add each book to the shelf
+            data.books.forEach(book => {
+                const bookElement = document.createElement('div');
+                bookElement.className = 'book';
+                bookElement.onclick = () => openBookModal(
+                    book.bookTitle, 
+                    book.bookAuthor, 
+                    book.bookGenre, 
+                    book.bookDescription, 
+                    book.bookImageURL,
+                    book.bookID
+                );
+                
+                const img = document.createElement('img');
+                img.src = book.bookImageURL || '../static/placeholder_book.jpg';
+                img.alt = book.bookTitle;
+                
+                bookElement.appendChild(img);
+                shelfContainer.appendChild(bookElement);
+            });
+        } else {
+            console.error('Failed to load shelf:', data.message);
+        }
+    } catch (error) {
+        console.error('Error loading shelf:', error);
+    }
+}
+
+// Enhanced openBookModal function to handle book IDs
+function openBookModal(title, author, genre, description = "No description available.", imageSrc = "", bookId = null) {
+    const modal = document.getElementById('shelf-modal') || document.getElementById('book-modal');
+    if (modal) {
+        const modalImage = modal.querySelector('.modal-book-img') || modal.querySelector('#book-image');
+        const modalTitle = modal.querySelector('#shelf-book-title') || modal.querySelector('#book-title');
+        const modalAuthor = modal.querySelector('#shelf-book-author') || modal.querySelector('#book-author');
+        const modalGenre = modal.querySelector('#shelf-book-genre') || modal.querySelector('#book-genre');
+        const modalDescription = modal.querySelector('#shelf-book-description') || modal.querySelector('#book-description');
+
+        // Populate modal with book details
+        if (modalImage) modalImage.src = imageSrc || '../static/placeholder_book.jpg';
+        if (modalTitle) modalTitle.textContent = title;
+        if (modalAuthor) modalAuthor.textContent = author;
+        if (modalGenre) modalGenre.textContent = genre;
+        if (modalDescription) modalDescription.textContent = description;
+        
+        // Store the book ID as a data attribute on the modal
+        if (bookId) modal.dataset.bookId = bookId;
+        
+        // Set up the Add to Shelf button
+        const addToShelfBtn = document.getElementById('add-to-shelf-btn');
+        if (addToShelfBtn) {
+            addToShelfBtn.onclick = () => addBookToShelf(bookId);
+        }
+        
+        // Set up the Remove from Shelf button
+        const removeFromShelfBtn = document.getElementById('remove-from-shelf');
+        if (removeFromShelfBtn) {
+            removeFromShelfBtn.onclick = () => removeBookFromShelf(bookId);
+        }
+
+        // Display the modal
+        modal.style.display = 'flex';
+    }
+}
+
+// Function to add a book to the user's shelf
+async function addBookToShelf(bookId) {
+    if (!currentUser) {
+        alert('Please log in to add books to your shelf');
+        return;
+    }
+    
+    try {
+        const response = await fetch('/api/add-to-shelf', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ username: currentUser, bookId })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            alert('Book added to your shelf!');
+            closeBookModal();
+        } else {
+            alert(data.message || 'Failed to add book to shelf');
+        }
+    } catch (error) {
+        console.error('Error adding book to shelf:', error);
+        alert('An error occurred while adding the book to your shelf');
+    }
+}
+
+// Function to remove a book from the user's shelf
+async function removeBookFromShelf(bookId) {
+    if (!currentUser) {
+        alert('Please log in to manage your shelf');
+        return;
+    }
+    
+    try {
+        const response = await fetch('/api/remove-from-shelf', {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ username: currentUser, bookId })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            alert('Book removed from your shelf');
+            closeBookModal();
+            // Reload the shelf to reflect the change
+            loadUserShelf(currentUser);
+        } else {
+            alert(data.message || 'Failed to remove book from shelf');
+        }
+    } catch (error) {
+        console.error('Error removing book from shelf:', error);
+        alert('An error occurred while removing the book from your shelf');
+    }
+}
