@@ -1,40 +1,30 @@
-document.getElementById("createAccountForm").addEventListener("submit", async (e) => {
-    e.preventDefault();
+// static/createAccount.js
+document.getElementById("createAccountForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  const username = e.target.username.value;
+  const email    = e.target.email.value;
+  const password = e.target.password.value;
 
-    // Get the input values
-    const username = document.getElementById("username").value;
-    const email = document.getElementById("email").value;
-    const password = document.getElementById("password").value;
-
-    // Send the data to the backend (server.js)
-    try {
-        const response = await fetch("/createAccount", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ username, email, password }),
-        });
-
-        const data = await response.json();
-
-        //return success message
-        if (data.success) {
-            alert("Account created successfully!");
-            window.location.href = "/login"; // Redirect to the login page
-            console.log("Redirecting to /login page")
-        }
-
-        else {
-            alert(data.message);
-        }
-    } catch (error) {
-        console.error("Error:", error);
-        alert("Server error. Please try again later.");
+  try {
+    const resp = await fetch("/create-account", {       // <-- note the dash
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, email, password })
+    });
+    const data = await resp.json();
+    if (data.success) {
+      alert(data.message);
+      window.location.href = "/login";
+    } else {
+      alert(data.message);
     }
+  } catch(err) {
+    console.error(err);
+    alert("Server error, try again later");
+  }
 });
 
-// Redirect back to login page for 'Back to Login' button
-document.getElementById("backToLoginBtn").addEventListener("click", () => {
-    window.location.href = "/login";
-});
+// back‑to‑login button
+document.getElementById("backToLoginBtn").onclick = () => {
+  window.location.href = "/login";
+};
