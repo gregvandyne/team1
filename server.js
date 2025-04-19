@@ -124,3 +124,169 @@ app.post('/login', async (req, res) => {
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
 });
+
+// Get books on user's shelf
+app.get('/api/my-shelf', async (req, res) => {
+  const { username } = req.query;
+  
+  if (!username) {
+    return res.status(400).json({ success: false, message: 'Username is required' });
+  }
+
+  try {
+    // First get the user ID
+    const userResult = await pool.query('SELECT "userID" FROM "PRIVATE"."USERS" WHERE "userUsername" = $1', [username]);
+    
+    if (userResult.rows.length === 0) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+    
+    const userId = userResult.rows[0].userID;
+    
+    // Then get all books on the user's shelf
+    const booksQuery = `
+      SELECT b."bookID", b."bookTitle", b."bookAuthor", b."bookGenre", b."bookDescription", b."bookImageURL", ub."dateAdded"
+      FROM "PRIVATE"."BOOKS" b
+      JOIN "PRIVATE"."USER_BOOKS" ub ON b."bookID" = ub."bookID"
+      WHERE ub."userID" = $1
+      ORDER BY ub."dateAdded" DESC
+    `;
+    
+    const booksResult = await pool.query(booksQuery, [userId]);
+    
+    return res.json({ success: true, books: booksResult.rows });
+  } catch (err) {
+    console.error('Error fetching shelf:', err);
+    return res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+// Add a book to user's shelf
+app.post('/api/add-to-shelf', async (req, res) => {
+  const { username, bookId } = req.body;
+  
+  if (!username || !bookId) {
+    return res.status(400).json({ success: false, message: 'Username and bookId are required' });
+  }
+
+  try {
+    // First get the user ID
+    const userResult = await pool.query('SELECT "userID" FROM "PRIVATE"."USERS" WHERE "userUsername" = $1', [username]);
+    
+    if (userResult.rows.length === 0) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+    
+    const userId = userResult.rows[0].userID;
+    
+    // Check if the book is already on the shelf
+    const checkQuery = 'SELECT 1 FROM "PRIVATE"."USER_BOOKS" WHERE "userID" = $1 AND "bookID" = $2';
+    const checkResult = await pool.query(checkQuery, [userId, bookId]);
+    
+    if (checkResult.rows.length > 0) {
+      return res.json({ success: false, message: 'Book is already on your shelf' });
+    }
+    
+    // Add the book to the shelf
+    const addQuery = 'INSERT INTO "PRIVATE"."USER_BOOKS" ("userID", "bookID") VALUES ($1, $2)';
+    await pool.query(addQuery, [userId, bookId]);
+    
+    return res.json({ success: true, message: 'Book added to your shelf' });
+  } catch (err) {
+    console.error('Error adding to shelf:', err);
+    return res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+// Remove a book from user's shelf
+app.delete('/api/remove-from-shelf', async (req, res) => {
+  const { username, bookId } = req.body;
+  
+  if (!username || !bookId) {
+    return res.status(400).json({ success: false, message: 'Username and bookId are required' });
+  }
+
+  try {
+    // First get the user ID
+    const userResult = await pool.query('SELECT "userID" FROM "PRIVATE"."USERS" WHERE "userUsername" = $1', [username]);
+    
+    if (userResult.rows.length === 0) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+    
+    const userId = userResult.rows[0].userID;
+    
+    // Remove the book from the shelf
+    const removeQuery = 'DELETE FROM "PRIVATE"."USER_BOOKS" WHERE "userID" = $1 AND "bookID" = $2';
+    const result = await pool.query(removeQuery, [userId, bookId]);
+    
+    if (result.rowCount === 0) {
+      return res.json({ success: false, message: 'Book was not on your shelf' });
+    }
+    
+    return res.json({ success: true, message: 'Book removed from your shelf' });
+  } catch (err) {
+    console.error('Error removing from shelf:', err);
+    return res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+// Get all available books
+app.get('/api/books', async (req, res) => {
+  try {
+    const booksQuery = 'SELECT * FROM "PRIVATE"."BOOKS"';
+    const booksResult = await pool.query(booksQuery);
+    
+    return res.json({ success: true, books: booksResult.rows });
+  } catch (err) {
+    console.error('Error fetching books:', err);
+    return res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+// Add a sample book (for testing)
+app.post('/api/add-sample-book', async (req, res) => {
+  try {
+    const bookQuery = `
+      INSERT INTO "PRIVATE"."BOOKS" ("bookTitle", "bookAuthor", "bookGenre", "bookDescription", "bookImageURL") 
+      VALUES ($1, $2, $3, $4, $5)
+      RETURNING "bookID"
+    `;
+    
+    const bookValues = [
+      'The Great Gatsby',
+      'F. Scott Fitzgerald',
+      'Classic',
+      'A story of wealth, love, and the American Dream in the 1920s.',
+      '../static/placeholder_book.jpg'
+    ];
+    
+    const result = await pool.query(bookQuery, bookValues);
+    
+    return res.json({ 
+      success: true, 
+      message: 'Sample book added', 
+      bookId: result.rows[0].bookID 
+    });
+  } catch (err) {
+    console.error('Error adding sample book:', err);
+    return res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
