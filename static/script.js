@@ -77,36 +77,6 @@ document.addEventListener('DOMContentLoaded', () => {
         alert('Filters Applied! (Functionality can be added here)');
     });
 
-    // Function to open the book modal
-    function openBookModal(title, author, genre, description = "No description available.", imageSrc = "") {
-        const modal = document.getElementById('shelf-modal') || document.getElementById('book-modal');
-        if (modal) {
-            const modalImage = modal.querySelector('.modal-book-img');
-            const modalTitle = modal.querySelector('#shelf-book-title') || modal.querySelector('#book-title');
-            const modalAuthor = modal.querySelector('#shelf-book-author') || modal.querySelector('#book-author');
-            const modalGenre = modal.querySelector('#shelf-book-genre') || modal.querySelector('#book-genre');
-            const modalDescription = modal.querySelector('#shelf-book-description') || modal.querySelector('#book-description');
-
-            // Populate modal with book details
-            if (modalImage) modalImage.src = imageSrc;
-            if (modalTitle) modalTitle.textContent = title;
-            if (modalAuthor) modalAuthor.textContent = author;
-            if (modalGenre) modalGenre.textContent = genre;
-            if (modalDescription) modalDescription.textContent = description;
-
-            // Display the modal
-            modal.style.display = 'flex';
-        }
-    }
-
-    // Function to close the book modal
-    function closeBookModal() {
-        const modal = document.getElementById('shelf-modal') || document.getElementById('book-modal');
-        if (modal) {
-            modal.style.display = 'none';
-        }
-    }
-
     // Close modal when clicking outside of it
     window.addEventListener('click', (e) => {
         const modal = document.getElementById('shelf-modal') || document.getElementById('book-modal');
@@ -124,7 +94,6 @@ document.addEventListener('DOMContentLoaded', () => {
 function navigateTo(page) {
     window.location.href = page;
 }
-
 
 // Global variable to store current user
 let currentUser = null;
@@ -151,6 +120,12 @@ async function loadUserShelf(username) {
     const resp = await fetch(`/api/my-shelf?username=${encodeURIComponent(username)}`);
     const data = await resp.json();
     const shelf = document.getElementById('shelf-books');
+    
+    if (!shelf) {
+      console.error('Shelf element not found');
+      return;
+    }
+    
     shelf.innerHTML = ''; // clear placeholders
 
     if (!data.success || data.books.length === 0) {
@@ -198,41 +173,69 @@ async function loadUserShelf(username) {
   }
 }
 
-
-// Enhanced openBookModal function to handle book IDs
-function openBookModal(title, author, genre, description = "No description available.", imageSrc = "", bookId = null) {
+// Comprehensive openBookModal function that handles all use cases
+function openBookModal(title, author, genre, description = "No description available.", imageSrc = "", bookId = null, downloads = 0) {
     const modal = document.getElementById('shelf-modal') || document.getElementById('book-modal');
     if (modal) {
-        const modalImage = modal.querySelector('.modal-book-img') || modal.querySelector('#book-image');
-        const modalTitle = modal.querySelector('#shelf-book-title') || modal.querySelector('#book-title');
-        const modalAuthor = modal.querySelector('#shelf-book-author') || modal.querySelector('#book-author');
-        const modalGenre = modal.querySelector('#shelf-book-genre') || modal.querySelector('#book-genre');
-        const modalDescription = modal.querySelector('#shelf-book-description') || modal.querySelector('#book-description');
+        const imgEl = modal.querySelector('.modal-book-img') || modal.querySelector('#book-image');
+        const titleEl = modal.querySelector('#shelf-book-title') || modal.querySelector('#book-title');
+        const authorEl = modal.querySelector('#shelf-book-author') || modal.querySelector('#book-author');
+        const genreEl = modal.querySelector('#shelf-book-genre') || modal.querySelector('#book-genre');
+        const descEl = modal.querySelector('#shelf-book-description') || modal.querySelector('#book-description');
+        const dlEl = modal.querySelector('#shelf-book-downloads');
 
-        // Populate modal with book details
-        if (modalImage) modalImage.src = imageSrc || '../static/placeholder_book.jpg';
-        if (modalTitle) modalTitle.textContent = title;
-        if (modalAuthor) modalAuthor.textContent = author;
-        if (modalGenre) modalGenre.textContent = genre;
-        if (modalDescription) modalDescription.textContent = description;
+        if (imgEl) imgEl.src = imageSrc || '/static/placeholder_book.jpg';
+        if (titleEl) titleEl.textContent = title;
+        if (authorEl) authorEl.textContent = author;
+        if (genreEl) genreEl.textContent = genre;
+        if (descEl) descEl.textContent = description;
+        if (dlEl) dlEl.textContent = downloads;
         
         // Store the book ID as a data attribute on the modal
         if (bookId) modal.dataset.bookId = bookId;
+
+        // Set up the download button
+        const downloadBtn = modal.querySelector('#download-btn');
+        if (downloadBtn && bookId) {
+            downloadBtn.onclick = async () => {
+                try {
+                    await fetch('/api/increment-download', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ bookId })
+                    });
+                    alert('Download started!');
+                    // update counter in UI
+                    if (dlEl) dlEl.textContent = parseInt(dlEl.textContent) + 1;
+                } catch(err) {
+                    console.error('Download error:', err);
+                    alert('Failed to bump download count');
+                }
+            };
+        }
         
         // Set up the Add to Shelf button
         const addToShelfBtn = document.getElementById('add-to-shelf-btn');
-        if (addToShelfBtn) {
+        if (addToShelfBtn && bookId) {
             addToShelfBtn.onclick = () => addBookToShelf(bookId);
         }
         
         // Set up the Remove from Shelf button
         const removeFromShelfBtn = document.getElementById('remove-from-shelf');
-        if (removeFromShelfBtn) {
+        if (removeFromShelfBtn && bookId) {
             removeFromShelfBtn.onclick = () => removeBookFromShelf(bookId);
         }
 
         // Display the modal
         modal.style.display = 'flex';
+    }
+}
+
+// Function to close the book modal
+function closeBookModal() {
+    const modal = document.getElementById('shelf-modal') || document.getElementById('book-modal');
+    if (modal) {
+        modal.style.display = 'none';
     }
 }
 
