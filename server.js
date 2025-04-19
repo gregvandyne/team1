@@ -145,11 +145,14 @@ app.get('/api/my-shelf', async (req, res) => {
     
     // Then get all books on the user's shelf
     const booksQuery = `
-      SELECT b."bookID", b."bookTitle", b."bookAuthor", b."bookGenre", b."bookDescription", b."bookImageURL", ub."dateAdded"
-      FROM "PRIVATE"."BOOKS" b
-      JOIN "PRIVATE"."USER_BOOKS" ub ON b."bookID" = ub."bookID"
+      SELECT b."bookID", b."bookTitle", b."bookAuthor",
+             b."bookGenre", b."bookDescription", b."bookImageURL",
+             b."downloadCount",          
+             ub."dateAdded"
+       FROM "PRIVATE"."BOOKS" b
+       JOIN "PRIVATE"."USER_BOOKS" ub ON b."bookID" = ub."bookID"
       WHERE ub."userID" = $1
-      ORDER BY ub."dateAdded" DESC
+  ORDER BY ub."dateAdded" DESC
     `;
     
     const booksResult = await pool.query(booksQuery, [userId]);
@@ -271,6 +274,24 @@ app.post('/api/add-sample-book', async (req, res) => {
   } catch (err) {
     console.error('Error adding sample book:', err);
     return res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+// Increment a book's downloadCount
+app.post('/api/increment-download', async (req, res) => {
+  const { bookId } = req.body;
+  if (!bookId) return res.status(400).json({ success:false, message:'bookId required' });
+
+  try {
+    await pool.query(
+      `UPDATE "PRIVATE"."BOOKS"
+           SET "downloadCount" = "downloadCount" + 1
+         WHERE "bookID" = $1`, [bookId]
+    );
+    res.json({ success:true });
+  } catch (e) {
+    console.error('increment-download error', e);
+    res.status(500).json({ success:false, message:'Server error' });
   }
 });
 
