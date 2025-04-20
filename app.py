@@ -18,7 +18,7 @@ cursor = conn.cursor()
 # Home page route
 @app.route('/home')
 def home():
-    return render_template('index.html')
+    return render_template('home.html')
 
 # My Shelf page route
 @app.route('/myShelf')

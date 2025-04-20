@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LitFlix</title>
+    <link rel="stylesheet" href="../static/styles.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="/home" class="logo">LITFLIX</a>
+            <div class="search-container">
+                <input id="search-input" type="text" placeholder="Search by Author, Title, or Genre">
+                <a href="/searchPage" class="search-btn">🔍</a>
+            </div>
+            <a href="/myShelf" class="my-shelf-btn">My Shelf</a>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="library-boxes">
+                <a href="/featured" class="library-box">
+                    <h2>FEATURED AUTHOR</h2>
+                    <img src="../static/feat_author_homepage.jpg" alt="statue in library">
+                </a>
+                <a href="/myShelf" class="library-box active">
+                    <h2>MY SHELF</h2>
+                    <img src="../static/myshelf_homepage.jpg" alt="library">
+                </a>
+                <a href="/collection" class="library-box">
+                    <h2>FEATURED COLLECTION</h2>
+                    <img src="../static/feat_collection_homepage.jpg" alt="ladder in library">
+                </a>
+            </div>
+            <div class="red-divider"></div>
+        </section>
+
+        <section class="book-row">
+            <h2>Continue Reading</h2>
+            <div class="book-list">
+                <div class="book" onclick="openBookModal('Crime and Punishment', 'Fyodor Dostoevsky', 'Classic', 'A gripping tale of morality and redemption.', '../static/crime_and_punishment.jpg')">
+                    <img src="../static/crime_and_punishment.jpg" alt="Crime and Punishment">
+                    <p>Crime and Punishment</p>
+                </div>
+                <div class="book" onclick="openBookModal('Dracula', 'Bram Stoker', 'Horror', 'A classic Gothic horror novel.', '../static/dracula.jpg')">
+                    <img src="../static/dracula.jpg" alt="Dracula">
+                    <p>Dracula</p>
+                </div>
+                <div class="book" onclick="openBookModal('The Great Gatsby', 'F. Scott Fitzgerald', 'Classic', 'A story of love and tragedy in the Jazz Age.', '../static/placeholder_book.jpg')">
+                    <img src="../static/placeholder_book.jpg" alt="The Great Gatsby">
+                    <p>The Great Gatsby</p>
+                </div>
+                <div class="book" onclick="openBookModal('Les Misérables', 'Victor Hugo', 'Historical Fiction', 'A tale of redemption and revolution in 19th-century France.', '../static/placeholder_book.jpg')">
+                    <img src="../static/placeholder_book.jpg" alt="Les Misérables">
+                    <p>Les Misérables</p>
+                </div>
+                <div class="book" onclick="openBookModal('Pride and Prejudice', 'Jane Austen', 'Romance', 'A witty exploration of love and social standing.', '../static/placeholder_book.jpg')">
+                    <img src="../static/placeholder_book.jpg" alt="Pride and Prejudice">
+                    <p>Pride and Prejudice</p>
+                </div>
+            </div>
+            <div class="grey-divider"></div>
+        </section>
+
+        <section class="book-row">
+            <h2>New to Our Shelves</h2>
+            <div class="book-list">
+                <div class="book">
+                    <img src="../static/placeholder_book.jpg" alt="The Odyssey">
+                    <p>The Odyssey</p>
+                </div>
+                <div class="book">
+                    <img src="../static/placeholder_book.jpg" alt="Jane Eyre">
+                    <p>Jane Eyre</p>
+                </div>
+                <div class="book">
+                    <img src="../static/placeholder_book.jpg" alt="Crime and Punishment">
+                    <p>Crime and Punishment</p>
+                </div>
+                <div class="book">
+                    <img src="../static/placeholder_book.jpg" alt="The Picture of Dorian Gray">
+                    <p>The Picture of Dorian Gray</p>
+                </div>
+                <div class="book">
+                    <img src="../static/placeholder_book.jpg" alt="The Catcher in the Rye">
+                    <p>The Catcher in the Rye</p>
+                </div>
+            </div>
+            <div class="grey-divider"></div>
+        </section>
+
+        <section class="book-row">
+            <h2>Science Fiction & Fantasy</h2>
+            <div class="book-list">
+                <div class="book"><img src="../static/placeholder_book.jpg" alt="Frankenstein"><p>Frankenstein</p></div>
+                <div class="book"><img src="../static/placeholder_book.jpg" alt="The War of the Worlds"><p>The War of the Worlds</p></div>
+                <div class="book"><img src="../static/placeholder_book.jpg" alt="A Journey to the Center of the Earth"><p>A Journey to the Center of the Earth</p></div>
+                <div class="book"><img src="../static/placeholder_book.jpg" alt="The Time Machine"><p>The Time Machine</p></div>
+                <div class="book"><img src="../static/placeholder_book.jpg" alt="The Wonderful Wizard of Oz"><p>The Wonderful Wizard of Oz</p></div>
+            </div>
+            <div class="grey-divider"></div>
+        </section>
+
+        <!-- Mystery & Thriller -->
+        <section class="book-row">
+            <h2>Mystery & Thriller</h2>
+            <div class="book-list">
+                <div class="book"><img src="../static/placeholder_book.jpg" alt="The Adventures of Sherlock Holmes"><p>The Adventures of Sherlock Holmes</p></div>
+                <div class="book"><img src="../static/placeholder_book.jpg" alt="The Hound of the Baskervilles"><p>The Hound of the Baskervilles</p></div>
+                <div class="book"><img src="../static/placeholder_book.jpg" alt="The Moonstone"><p>The Moonstone</p></div>
+                <div class="book"><img src="../static/placeholder_book.jpg" alt="The Mystery of Edwin Drood"><p>The Mystery of Edwin Drood</p></div>
+                <div class="book"><img src="../static/placeholder_book.jpg" alt="The Woman in White"><p>The Woman in White</p></div>
+            </div>
+            <div class="grey-divider"></div>
+        </section>
+
+        <!-- Biographies & Memoirs -->
+        <section class="book-row">
+            <h2>Biographies & Memoirs</h2>
+            <div class="book-list">
+                <div class="book"><img src="../static/placeholder_book.jpg" alt="The Autobiography of Benjamin Franklin"><p>The Autobiography of Benjamin Franklin</p></div>
+                <div class="book"><img src="../static/placeholder_book.jpg" alt="Narrative of the Life of Frederick Douglass"><p>Narrative of the Life of Frederick Douglass</p></div>
+                <div class="book"><img src="../static/placeholder_book.jpg" alt="Incidents in the Life of a Slave Girl"><p>Incidents in the Life of a Slave Girl</p></div>
+                <div class="book"><img src="../static/placeholder_book.jpg" alt="Up from Slavery"><p>Up from Slavery</p></div>
+                <div class="book"><img src="../static/placeholder_book.jpg" alt="Life of Charlotte Brontë"><p>Life of Charlotte Brontë</p></div>
+            </div>
+            <div class="grey-divider"></div>
+        </section>
+
+        <!-- Poetry -->
+        <section class="book-row">
+            <h2>Poetry</h2>
+            <div class="book-list">
+                <div class="book"><img src="../static/placeholder_book.jpg" alt="The Raven and Other Poems"><p>The Raven and Other Poems</p></div>
+                <div class="book"><img src="../static/placeholder_book.jpg" alt="Leaves of Grass"><p>Leaves of Grass</p></div>
+                <div class="book"><img src="../static/placeholder_book.jpg" alt="The Waste Land"><p>The Waste Land</p></div>
+                <div class="book"><img src="../static/placeholder_book.jpg" alt="Sonnets from the Portuguese"><p>Sonnets from the Portuguese</p></div>
+                <div class="book"><img src="../static/placeholder_book.jpg" alt="Paradise Lost"><p>Paradise Lost</p></div>
+            </div>
+            <div class="grey-divider"></div>
+        </section>
+
+        <!-- Modal Window -->
+        <div id="book-modal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeBookModal()">&times;</span>
+                <div class="modal-body">
+                    <img id="book-image" src="" alt="Book Cover" class="modal-book-img">
+                    <div class="modal-details">
+                        <h2 id="book-title"></h2>
+                        <p><strong>Author:</strong> <span id="book-author"></span></p>
+                        <p><strong>Genre:</strong> <span id="book-genre"></span></p>
+                        <p id="book-description"></p>
+                        <div class="modal-buttons">
+                            <button id="add-to-shelf-btn">Add to My Shelf</button>
+                            <button id="download-btn">Download</button>
+                            <button id="close-modal" onclick="closeBookModal()">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script src="../static/script.js"></script>
+</body>
+</html>
