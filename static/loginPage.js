@@ -4,8 +4,8 @@ const loginModal = document.getElementById('loginBody');
 const loginModalClose = document.getElementById('closeModal');
 const loginBody = document.getElementById('loginBody');
 const cancelBtn = document.getElementById('cancelBtn');
-const usernameInput = document.querySelector('input[name="uname"]');
-const passwordInput = document.querySelector('input[name="psw"]');
+const usernameInput = document.querySelector('input[name="username"]');
+const passwordInput = document.querySelector('input[name="password"]');
 
 //Define variable functions above
 loginBtn.onclick = function () {

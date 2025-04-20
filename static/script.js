@@ -1,9 +1,35 @@
 document.addEventListener('DOMContentLoaded', () => {
     // Book Hover Effect
     document.querySelectorAll('.book').forEach(book => {
-        book.addEventListener('mouseenter', () => book.style.transform = 'scale(1.05)');
-        book.addEventListener('mouseleave', () => book.style.transform = 'scale(1)');
+        book.addEventListener('click', async function (e) {
+            e.stopPropagation(); // Prevent unintended triggers
+
+            const isShelfPage = document.getElementById('shelf-books') !== null; //check if yout on myShelf page or not
+            const bookId = this.dataset.bookId; // Assume each book div has a `data-id` attribute with the book's ID
+            //const modal = document.getElementById('book-modal'); // or shelfModal depending on the page
+            const modal = isShelfPage ? shelfModal : bookModal; //use shelfMondal of on myShelf page, bookModal if not
+            const prefix = isShelfPage ? 'shelf' : 'book';
+
+            if (!modal) return;
+
+            modal.style.display = 'block';
+            try {
+            // Fetch real data about the book from the server
+                const response = await fetch(`/book/${bookId}`);
+                const bookData = await response.json();
+
+                // Update the modal with real data
+                document.getElementById('${prefix}-book-image').src = bookData.imageUrl;
+                document.getElementById('${prefix}-book-title').textContent = bookData.title;
+                document.getElementById('${prefix}-book-author').textContent = bookData.author;
+                document.getElementById('${prefix}-book-genre').textContent = bookData.genre;
+                document.getElementById('${prefix}-book-description').textContent = bookData.description;
+            } catch (error) {
+            console.error('Error fetching book data:', error);
+            }   
+        });
     });
+
 
     // Horizontal Scrolling for Book Lists
     document.querySelectorAll('.book-list').forEach(list => {
@@ -24,12 +50,21 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+
     // Library Box Selection
     document.querySelectorAll('.library-box').forEach(box => {
         box.addEventListener('click', function () {
             document.querySelectorAll('.library-box').forEach(b => b.classList.remove('active'));
             this.classList.add('active');
-            document.querySelector('.hero-content h1').textContent = this.querySelector('h2').textContent;
+
+            const newTitle = this.querySelector('h2').textContent;
+            const heroTitle = document.querySelector('.hero-content h1');
+
+            if (heroTitle) {
+                heroTitle.textContent = newTitle;
+            } else {
+                console.error('Could not find .hero-content h1');
+            }
         });
     });
 

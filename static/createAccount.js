@@ -8,7 +8,7 @@ document.getElementById("createAccountForm").addEventListener("submit", async (e
 
     // Send the data to the backend (server.js)
     try {
-        const response = await fetch("/create-account", {
+        const response = await fetch("/createAccount", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -36,5 +36,5 @@ document.getElementById("createAccountForm").addEventListener("submit", async (e
 
 // Redirect back to login page for 'Back to Login' button
 document.getElementById("backToLoginBtn").addEventListener("click", () => {
-    window.location.href = "/loginPage";
+    window.location.href = "/login";
 });
