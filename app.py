@@ -133,7 +133,7 @@ def index():
 
 @app.route('/home')
 def home():
-    cursor = conn.cursor()  # <-- Reinitialize the cursor here
+    cursor = conn.cursor() 
     try:
         genres = {
             'Science Fiction': 'books_sci_fi',

@@ -1,302 +1,235 @@
-//server.js file intended to connect database backend to front end
+// server.js updated to include full functionality from both app.py and original server.js
 
-//Import necessary modules
-const { Pool } = require('pg'); // PostgreSQL client for Node.js
 const express = require('express');
 const bodyParser = require('body-parser');
-const bcrypt = require('bcryptjs'); // For password hashing
+const bcrypt = require('bcryptjs');
 const path = require('path');
+const { Pool } = require('pg');
 const app = express();
 const port = 3000;
 
-
-// Define a route for "/"
-app.get("/", (req, res) => {
-    res.send("Welcome to the server!");
-});
-
-//get route to set HTML page up for create Account page
-app.get('/create-account', (req, res) => {
-    res.sendFile(path.join(__dirname, 'createAccount.html'));
-});
-
-//route for the login page
-app.get('/login', (req, res) => {
-    res.sendFile(path.join(__dirname, 'loginPage.html'));
-});
-
-//route for the myShelf page after logging in 
-app.get('/myShelf', (req, res) => {
-    res.sendFile(path.join(__dirname, 'myShelf.html'));
-});
-
-//directs routes for createAccount.html and createAccount.js
-app.use(express.static(__dirname));
-
-
-
-// Neon Database Connection Configuration
+// Database connection
 const pool = new Pool({
   connectionString: 'postgresql://neondb_owner:npg_SJNojOlDZ37x@ep-dry-wildflower-a8ojs434-pooler.eastus2.azure.neon.tech/neondb?sslmode=require',
-  ssl: { rejectUnauthorized: false } // Required for SSL connection
+  ssl: { rejectUnauthorized: false }
 });
 
-// Middleware to parse JSON request bodies
+// Middleware
 app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.static(__dirname));
+app.use(express.static(path.join(__dirname, 'static')));
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'templates'));
 
-// Handle account creation (Sign up)
-app.post('/create-account', async (req, res) => {
-  const { username, email, password } = req.body;
+// Routes
+app.get('/', (req, res) => res.redirect('/home'));
 
-    try {
-        // Check if the username or email already exists
-        const checkQuery = 'SELECT * FROM "PRIVATE"."USERS" WHERE "userUsername" = $1 OR "userEmail" = $2';
-        const result = await pool.query(checkQuery, [username, email]);
+// Home page with genres
+app.get('/home', async (req, res) => {
+  try {
+    const genres = {
+      'Science Fiction': 'books_sci_fi',
+      'Mystery & Thriller': 'books_mystery',
+      'Biographies & Memoirs': 'books_biography',
+      'Poetry': 'books_poetry'
+    };
+    const results = {};
+    const allGenreBooks = [];
 
-        if (result.rows.length > 0) {
-            return res.json({ success: false, message: "Username or email already exists." });
-        }
-
-        // Hash password before storing pw in database
-        const hashedPassword = await bcrypt.hash(password, 10);
-
-        // Insert the new user into the database, 
-        const insertQuery = 'INSERT INTO "PRIVATE"."USERS" ("userUsername", "userEmail", "userPassword") VALUES ($1, $2, $3)';
-
-        await pool.query(insertQuery, [username, email, hashedPassword]);
-
-        return res.json({ success: true, message: "Account created successfully!" });
-    } catch (error) {
-        if (error.code === '23505') {
-            const checkUsername = 'SELECT 1 FROM "PRIVATE"."USERS" WHERE "userUsername" = $1';
-            const checkEmail = 'SELECT 1 FROM "PRIVATE"."USERS" WHERE "userEmail" = $1';
-
-            const usernameExists = (await pool.query(checkUsername, [username])).rowCount > 0;
-            const emailExists = (await pool.query(checkEmail, [email])).rowCount > 0;
-
-            if (usernameExists && emailExists) {
-                return res.json({ success: false, message: "Username and email already exist." });
-            }
-            else if (usernameExists) {
-                return res.json({ success: false, message: "Username already exists. Choose a different one." });
-            }
-            else if (emailExists) {
-                return res.json({ success: false, message: "Email already exists. Use a different email." });
-            }
-        }
-
-        console.error("Error creating account:", error);
-        return res.json({ success: false, message: "Failed to create account." });
+    for (const genre in genres) {
+      const query = `
+        SELECT b.id, b.title, b.cover_image_url, b.gutenberg_id, b.genre,
+               STRING_AGG(DISTINCT p.name, ', ') FILTER (WHERE p.name IS NOT NULL) AS author
+        FROM books_book b
+        LEFT JOIN books_book_authors ba ON b.gutenberg_id = ba.book_id
+        LEFT JOIN books_person p ON ba.person_id = p.id
+        WHERE b.genre = $1
+        GROUP BY b.id, b.title, b.cover_image_url, b.gutenberg_id, b.genre
+        LIMIT 25;
+      `;
+      const { rows } = await pool.query(query, [genre]);
+      const books = rows.map(row => ({
+        id: row.id,
+        title: row.title,
+        cover_image_url: row.cover_image_url,
+        author: row.author?.trim() || 'Unknown',
+        download_url: `https://www.gutenberg.org/files/${row.gutenberg_id}/${row.gutenberg_id}-0.txt`
+      }));
+      results[genres[genre]] = books;
+      allGenreBooks.push(...books);
     }
+
+    results['books_new'] = allGenreBooks.sort(() => 0.5 - Math.random()).slice(0, 10);
+    res.render('home', results);
+  } catch (err) {
+    console.error("Database error:", err);
+    res.render('home', {
+      books_sci_fi: [], books_mystery: [], books_biography: [], books_poetry: [], books_new: []
+    });
+  }
 });
 
-// Handle login (Authenticate user)
-app.post('/login', async (req, res) => {
-  const { username, password } = req.body;
+// Search with filtering
+app.get('/searchPage', async (req, res) => {
+  const searchQuery = req.query.q || '';
+  const genre = req.query.genre || '';
+  const author = req.query.author || '';
+  const year = req.query.year || '';
+  const format = req.query.format || '';
+  const rating = req.query.rating || '';
 
   try {
-    // Query to find the user in the database
-    const result = await pool.query('SELECT * FROM "PRIVATE"."USERS" WHERE "userUsername" = $1', [username]);
+    let query = `
+      SELECT DISTINCT b.*, 
+             string_agg(DISTINCT s.name, ', ') AS genres,
+             string_agg(DISTINCT p.name, ', ') AS authors
+      FROM books_book b
+      LEFT JOIN books_book_genre bbg ON b.gutenberg_id = bbg.book_id
+      LEFT JOIN books_subject s ON bbg.subject_id = s.id
+      LEFT JOIN books_book_authors bba ON b.gutenberg_id = bba.book_id
+      LEFT JOIN books_person p ON bba.person_id = p.id
+      WHERE 1=1
+    `;
+    const queryParams = [];
+    let paramCount = 1;
 
-    if (result.rows.length === 0) {
-      // User not found
-      return res.json({ success: false, message: "Invalid username or password." });
+    if (searchQuery) {
+      query += ` AND (
+        LOWER(b.title) LIKE LOWER($${paramCount}) 
+        OR EXISTS (
+          SELECT 1 FROM books_person p2 
+          JOIN books_book_authors bba2 ON p2.id = bba2.person_id 
+          WHERE bba2.book_id = b.gutenberg_id AND LOWER(p2.name) LIKE LOWER($${paramCount})
+        )
+        OR EXISTS (
+          SELECT 1 FROM books_subject s2 
+          JOIN books_book_genre bbg2 ON s2.id = bbg2.subject_id 
+          WHERE bbg2.book_id = b.gutenberg_id AND LOWER(s2.name) LIKE LOWER($${paramCount})
+        )
+      )`;
+      queryParams.push(`%${searchQuery}%`);
+      paramCount++;
     }
 
-    const user = result.rows[0];
+    if (genre && genre !== 'all') {
+      query += ` AND EXISTS (
+        SELECT 1 FROM books_subject s3 
+        JOIN books_book_genre bbg3 ON s3.id = bbg3.subject_id 
+        WHERE bbg3.book_id = b.gutenberg_id AND LOWER(s3.name) LIKE LOWER($${paramCount})
+      )`;
+      queryParams.push(`%${genre}%`);
+      paramCount++;
+    }
 
-    // Compare the provided password with the stored hashed password
-    const isMatch = await bcrypt.compare(password, user.userPassword);
+    if (author) {
+      query += ` AND EXISTS (
+        SELECT 1 FROM books_person p3 
+        JOIN books_book_authors bba3 ON p3.id = bba3.person_id 
+        WHERE bba3.book_id = b.gutenberg_id AND LOWER(p3.name) LIKE LOWER($${paramCount})
+      )`;
+      queryParams.push(`%${author}%`);
+      paramCount++;
+    }
 
-    if (isMatch) {
-        return res.json({ success: true, message: "Login successful!" });
+    if (year) {
+      query += ` AND b.title LIKE $${paramCount}`;
+      queryParams.push(`%${year}%`);
+      paramCount++;
+    }
 
+    query += ` GROUP BY b.gutenberg_id, b.download_count, b.media_type, b.title, b.copyright, b.gutenberg_url, b.cover_image_url LIMIT 50`;
+
+    const searchResult = await pool.query(query, queryParams);
+
+    res.render('searchPage', {
+      books: searchResult.rows,
+      searchQuery,
+      filters: { genre, author, year, format, rating }
+    });
+  } catch (error) {
+    console.error('Error executing search query:', error);
+    res.status(500).send('<h1>Error occurred</h1><p>There was an error while processing your request. Please try again later.</p>');
+  }
+});
+
+// Filter suggestion endpoint
+app.get('/api/filter-suggestions', async (req, res) => {
+  const type = req.query.type;
+  const term = req.query.term || '';
+
+  try {
+    let query;
+    if (type === 'genre') {
+      query = `SELECT DISTINCT name FROM books_subject WHERE LOWER(name) LIKE LOWER($1) ORDER BY name LIMIT 20`;
+    } else if (type === 'author') {
+      query = `SELECT DISTINCT name FROM books_person WHERE LOWER(name) LIKE LOWER($1) ORDER BY name LIMIT 20`;
     } else {
-      return res.json({ success: false, message: "Invalid username or password." });
+      return res.status(400).json({ error: 'Invalid suggestion type' });
     }
-  } catch (err) {
-    console.error('Error:', err);
-    return res.status(500).json({ success: false, error: 'Server error' });
+
+    const result = await pool.query(query, [`%${term}%`]);
+    res.json(result.rows.map(row => row.name));
+  } catch (error) {
+    console.error('Error fetching suggestions:', error);
+    res.status(500).json({ error: 'Server error' });
   }
 });
 
-// Start the server
-app.listen(port, () => {
-  console.log(`Server is running on http://localhost:${port}`);
-});
-
-// Get books on user's shelf
-app.get('/api/my-shelf', async (req, res) => {
-  const { username } = req.query;
-  
-  if (!username) {
-    return res.status(400).json({ success: false, message: 'Username is required' });
-  }
-
+// Apply filters API
+app.post('/api/apply-filters', async (req, res) => {
   try {
-    // First get the user ID
-    const userResult = await pool.query('SELECT "userID" FROM "PRIVATE"."USERS" WHERE "userUsername" = $1', [username]);
-    
-    if (userResult.rows.length === 0) {
-      return res.status(404).json({ success: false, message: 'User not found' });
-    }
-    
-    const userId = userResult.rows[0].userID;
-    
-    // Then get all books on the user's shelf
-    const booksQuery = `
-      SELECT b."bookID", b."bookTitle", b."bookAuthor",
-             b."bookGenre", b."bookDescription", b."bookImageURL",
-             b."downloadCount",          
-             ub."dateAdded"
-       FROM "PRIVATE"."BOOKS" b
-       JOIN "PRIVATE"."USER_BOOKS" ub ON b."bookID" = ub."bookID"
-      WHERE ub."userID" = $1
-  ORDER BY ub."dateAdded" DESC
-    `;
-    
-    const booksResult = await pool.query(booksQuery, [userId]);
-    
-    return res.json({ success: true, books: booksResult.rows });
-  } catch (err) {
-    console.error('Error fetching shelf:', err);
-    return res.status(500).json({ success: false, message: 'Server error' });
-  }
-});
-
-// Add a book to user's shelf
-app.post('/api/add-to-shelf', async (req, res) => {
-  const { username, bookId } = req.body;
-  
-  if (!username || !bookId) {
-    return res.status(400).json({ success: false, message: 'Username and bookId are required' });
-  }
-
-  try {
-    // First get the user ID
-    const userResult = await pool.query('SELECT "userID" FROM "PRIVATE"."USERS" WHERE "userUsername" = $1', [username]);
-    
-    if (userResult.rows.length === 0) {
-      return res.status(404).json({ success: false, message: 'User not found' });
-    }
-    
-    const userId = userResult.rows[0].userID;
-    
-    // Check if the book is already on the shelf
-    const checkQuery = 'SELECT 1 FROM "PRIVATE"."USER_BOOKS" WHERE "userID" = $1 AND "bookID" = $2';
-    const checkResult = await pool.query(checkQuery, [userId, bookId]);
-    
-    if (checkResult.rows.length > 0) {
-      return res.json({ success: false, message: 'Book is already on your shelf' });
-    }
-    
-    // Add the book to the shelf
-    const addQuery = 'INSERT INTO "PRIVATE"."USER_BOOKS" ("userID", "bookID") VALUES ($1, $2)';
-    await pool.query(addQuery, [userId, bookId]);
-    
-    return res.json({ success: true, message: 'Book added to your shelf' });
-  } catch (err) {
-    console.error('Error adding to shelf:', err);
-    return res.status(500).json({ success: false, message: 'Server error' });
-  }
-});
-
-// Remove a book from user's shelf
-app.delete('/api/remove-from-shelf', async (req, res) => {
-  const { username, bookId } = req.body;
-  
-  if (!username || !bookId) {
-    return res.status(400).json({ success: false, message: 'Username and bookId are required' });
-  }
-
-  try {
-    // First get the user ID
-    const userResult = await pool.query('SELECT "userID" FROM "PRIVATE"."USERS" WHERE "userUsername" = $1', [username]);
-    
-    if (userResult.rows.length === 0) {
-      return res.status(404).json({ success: false, message: 'User not found' });
-    }
-    
-    const userId = userResult.rows[0].userID;
-    
-    // Remove the book from the shelf
-    const removeQuery = 'DELETE FROM "PRIVATE"."USER_BOOKS" WHERE "userID" = $1 AND "bookID" = $2';
-    const result = await pool.query(removeQuery, [userId, bookId]);
-    
-    if (result.rowCount === 0) {
-      return res.json({ success: false, message: 'Book was not on your shelf' });
-    }
-    
-    return res.json({ success: true, message: 'Book removed from your shelf' });
-  } catch (err) {
-    console.error('Error removing from shelf:', err);
-    return res.status(500).json({ success: false, message: 'Server error' });
-  }
-});
-
-// Get all available books
-app.get('/api/books', async (req, res) => {
-  try {
-    const booksQuery = 'SELECT * FROM "PRIVATE"."BOOKS"';
-    const booksResult = await pool.query(booksQuery);
-    
-    return res.json({ success: true, books: booksResult.rows });
-  } catch (err) {
-    console.error('Error fetching books:', err);
-    return res.status(500).json({ success: false, message: 'Server error' });
-  }
-});
-
-// Add a sample book (for testing)
-app.post('/api/add-sample-book', async (req, res) => {
-  try {
-    const bookQuery = `
-      INSERT INTO "PRIVATE"."BOOKS" ("bookTitle", "bookAuthor", "bookGenre", "bookDescription", "bookImageURL") 
-      VALUES ($1, $2, $3, $4, $5)
-      RETURNING "bookID"
-    `;
-    
-    const bookValues = [
-      'The Great Gatsby',
-      'F. Scott Fitzgerald',
-      'Classic',
-      'A story of wealth, love, and the American Dream in the 1920s.',
-      '../static/placeholder_book.jpg'
-    ];
-    
-    const result = await pool.query(bookQuery, bookValues);
-    
-    return res.json({ 
+    const { genre, author, year, format, rating } = req.body;
+    res.json({ 
       success: true, 
-      message: 'Sample book added', 
-      bookId: result.rows[0].bookID 
+      message: 'Filters applied',
+      appliedFilters: { genre, author, year, format, rating }
+    });
+  } catch (error) {
+    console.error('Error applying filters:', error);
+    res.status(500).json({ success: false, error: 'Server error' });
+  }
+});
+
+// API route to fetch book details
+app.get('/api/books/:gutenberg_id', async (req, res) => {
+  const gutenbergId = req.params.gutenberg_id;
+  try {
+    const bookResult = await pool.query(`SELECT * FROM books_book WHERE gutenberg_id = $1`, [gutenbergId]);
+    if (bookResult.rows.length === 0) return res.status(404).json({ error: 'Book not found' });
+    const book = bookResult.rows[0];
+
+    const authors = (await pool.query(`
+      SELECT name FROM books_person bp
+      JOIN books_book_authors bba ON bp.id = bba.person_id
+      WHERE bba.book_id = $1
+    `, [gutenbergId])).rows.map(r => r.name);
+
+    const genres = (await pool.query(`
+      SELECT name FROM books_subject bs
+      JOIN books_book_genre bbg ON bs.id = bbg.subject_id
+      WHERE bbg.book_id = $1
+    `, [gutenbergId])).rows.map(r => r.name);
+
+    const summaryResult = await pool.query(`SELECT text FROM books_summary WHERE book_id = $1`, [gutenbergId]);
+    const description = summaryResult.rows[0]?.text || 'No description';
+
+    res.json({
+      title: book.title,
+      author: authors.join(', '),
+      genre: genres.join(', '),
+      cover_image_url: book.cover_image_url || 'default-image-url.jpg',
+      description
     });
   } catch (err) {
-    console.error('Error adding sample book:', err);
-    return res.status(500).json({ success: false, message: 'Server error' });
+    console.error('Error fetching book data:', err.message);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
-// Increment a book's downloadCount
-app.post('/api/increment-download', async (req, res) => {
-  const { bookId } = req.body;
-  if (!bookId) return res.status(400).json({ success:false, message:'bookId required' });
+// Static render routes
+app.get('/myShelf', (req, res) => res.sendFile(path.join(__dirname, 'templates', 'myShelf.html')));
+app.get('/featured', (req, res) => res.sendFile(path.join(__dirname, 'templates', 'featured.html')));
+app.get('/collection', (req, res) => res.sendFile(path.join(__dirname, 'templates', 'collection.html')));
 
-  try {
-    await pool.query(
-      `UPDATE "PRIVATE"."BOOKS"
-           SET "downloadCount" = "downloadCount" + 1
-         WHERE "bookID" = $1`, [bookId]
-    );
-    res.json({ success:true });
-  } catch (e) {
-    console.error('increment-download error', e);
-    res.status(500).json({ success:false, message:'Server error' });
-  }
-});
-
-
-
-
-
-
+app.listen(port, () => console.log(`🚀 Server is running on http://localhost:${port}`));
