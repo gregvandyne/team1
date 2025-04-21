@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, jsonify, redirect, url_for
 from flask_bcrypt import Bcrypt
 import psycopg2
+import random
 
 app = Flask(__name__)
 bcrypt = Bcrypt(app)
@@ -145,13 +146,13 @@ def home():
 
         for genre, key in genres.items():
             cursor.execute('''
-                SELECT b.id, b.title, b.cover_image_url, b.gutenberg_id,
-                       STRING_AGG(DISTINCT p.name, ', ') AS author
+                SELECT b.id, b.title, b.cover_image_url, b.gutenberg_id, b.genre,
+                       STRING_AGG(DISTINCT p.name, ', ') FILTER (WHERE p.name IS NOT NULL) AS author
                 FROM books_book b
-                LEFT JOIN books_book_authors ba ON b.id = ba.book_id
+                LEFT JOIN books_book_authors ba ON b.gutenberg_id = ba.book_id
                 LEFT JOIN books_person p ON ba.person_id = p.id
                 WHERE b.genre = %s
-                GROUP BY b.id, b.title, b.cover_image_url, b.gutenberg_id
+                GROUP BY b.id, b.title, b.cover_image_url, b.gutenberg_id, b.genre
                 LIMIT 25;
             ''', (genre,))
             rows = cursor.fetchall()
@@ -160,15 +161,13 @@ def home():
                     'id': row[0],
                     'title': row[1],
                     'cover_image_url': row[2],
-                    'author': row[4] if row[4] else 'Unknown',
+                    'author': row[5] if row[5] and row[5].strip() else 'Unknown',
                     'download_url': f'https://www.gutenberg.org/files/{row[3]}/{row[3]}-0.txt'
                 } for row in rows
             ]
             results[key] = books
             all_genre_books.extend(books)
 
-        # Fetch 10 random books from the accumulated genre books
-        import random
         results['books_new'] = random.sample(all_genre_books, min(10, len(all_genre_books)))
 
         return render_template('home.html', **results)
@@ -185,15 +184,15 @@ def searchPage():
 
     try:
         cursor.execute('''
-            SELECT b.id, b.title, b.cover_image_url, b.gutenberg_id,
-                   STRING_AGG(DISTINCT p.name, ', ') AS author
+            SELECT b.id, b.title, b.cover_image_url, b.gutenberg_id, b.genre,
+                   STRING_AGG(DISTINCT p.name, ', ') FILTER (WHERE p.name IS NOT NULL) AS author
             FROM books_book b
-            LEFT JOIN books_book_authors ba ON b.id = ba.book_id
+            LEFT JOIN books_book_authors ba ON b.gutenberg_id = ba.book_id
             LEFT JOIN books_person p ON ba.person_id = p.id
             WHERE LOWER(b.title) ILIKE %s
                OR LOWER(p.name) ILIKE %s
                OR LOWER(b.genre) ILIKE %s
-            GROUP BY b.id, b.title, b.cover_image_url, b.gutenberg_id
+            GROUP BY b.id, b.title, b.cover_image_url, b.gutenberg_id, b.genre
             LIMIT 100;
         ''', (f'%{query.lower()}%', f'%{query.lower()}%', f'%{query.lower()}%'))
 
@@ -203,7 +202,7 @@ def searchPage():
                 'id': row[0],
                 'title': row[1],
                 'cover_image_url': row[2],
-                'author': row[4] if row[4] else 'Unknown',
+                'author': row[5] if row[5] and row[5].strip() else 'Unknown',
                 'download_url': f'https://www.gutenberg.org/files/{row[3]}/{row[3]}-0.txt'
             } for row in books
         ]
@@ -212,7 +211,8 @@ def searchPage():
     except Exception as e:
         print("Search error:", e)
         return render_template('searchPage.html', books=[], query=query)
-    
+
+# Other routes remain unchanged
 @app.route('/myShelf')
 def myShelf():
     return render_template('myShelf.html')
