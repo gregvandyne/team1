@@ -1,20 +1,21 @@
 from flask import Flask, render_template, request, jsonify, redirect, url_for
 from flask_bcrypt import Bcrypt
 import psycopg2
+import os
 import random
 
 app = Flask(__name__)
 bcrypt = Bcrypt(app)
 
 # -------- DATABASE CONNECTION --------
-conn = psycopg2.connect(
-    dbname="neondb",
-    user="neondb_owner",
-    password="npg_SJNojOlDZ37x",
-    host="ep-dry-wildflower-a8ojs434-pooler.eastus2.azure.neon.tech",
-    sslmode="require"
-)
+DATABASE_URL = os.environ.get("DATABASE_URL")
+
+if not DATABASE_URL:
+    raise ValueError("🚨 DATABASE_URL environment variable not set.")
+
+conn = psycopg2.connect(DATABASE_URL, sslmode="require")
 cursor = conn.cursor()
+
 
 # -------- ONE-TIME: Add id column if not exists (non-primary key) --------
 try:
