@@ -1,10 +1,256 @@
+<!-- templates/searchPage.ejs sets up the searchpage and its functionaliy-->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Shelf</title>
+    <title>Search Results - LitFlix</title>
     <link rel="stylesheet" href="../static/styles.css">
+    <style>
+        .search-results {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+        
+        .search-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .results-count {
+            color: #aaa;
+            font-size: 0.9rem;
+        }
+        
+        .book-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 20px;
+        }
+        
+        .book-card {
+            background: rgba(30, 30, 30, 0.7);
+            border-radius: 8px;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .book-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        .book-cover {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+        }
+        
+        .book-info {
+            padding: 15px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .book-title {
+            font-size: 1rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #fff;
+        }
+        
+        .book-author {
+            font-size: 0.85rem;
+            color: #aaa;
+            margin-bottom: 10px;
+        }
+        
+        .book-genre {
+            font-size: 0.75rem;
+            color: #777;
+            margin-bottom: auto;
+        }
+        
+        .book-actions {
+            margin-top: 10px;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .book-btn {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 4px;
+            background: #333;
+            color: #fff;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: background 0.2s ease;
+        }
+        
+        .book-btn:hover {
+            background: #444;
+        }
+        
+        .book-btn.primary {
+            background: #e50914;
+        }
+        
+        .book-btn.primary:hover {
+            background: #f40612;
+        }
+        
+        .no-results {
+            text-align: center;
+            padding: 50px 0;
+            color: #aaa;
+        }
+        
+        /* Filter sidebar improvements */
+        .filter-sidebar {
+            padding-top: 80px; /* Account for fixed header */
+            position: fixed;
+            left: -250px; /* Initially hidden */
+            top: 0;
+            width: 250px;
+            height: 100%;
+            background: rgba(20, 20, 20, 0.95);
+            box-shadow: 4px 0 10px rgba(0, 0, 0, 0.5);
+            transition: left 0.3s ease-in-out;
+            z-index: 1000;
+        }
+        
+        .filter-sidebar.open {
+            left: 0;
+        }
+        
+        .filter-content {
+            padding: 20px;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        }
+        
+        .filter-sidebar.open .filter-content {
+            opacity: 1;
+        }
+        
+        .filter-group {
+            margin-bottom: 20px;
+        }
+        
+        .filter-title {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            color: #e50914;
+        }
+        
+        .filter-sidebar input,
+        .filter-sidebar select {
+            background: #333;
+            color: #fff;
+            border: 1px solid #555;
+            width: 100%;
+            padding: 8px;
+            border-radius: 5px;
+        }
+        
+        .filter-sidebar input:focus,
+        .filter-sidebar select:focus {
+            border-color: #e50914;
+            outline: none;
+        }
+        
+        .filter-toggle {
+            position: absolute;
+            right: -30px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 30px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            font-size: 1.5rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border-radius: 0 5px 5px 0;
+            transition: background 0.3s ease-in-out;
+        }
+        
+        .filter-toggle:hover {
+            background: rgba(255, 255, 255, 0.4);
+        }
+        
+        .filter-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+        }
+        
+        .reset-filters {
+            background: #333;
+            color: white;
+            padding: 8px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        .reset-filters:hover {
+            background: #444;
+        }
+        
+        .apply-filters {
+            background: #e50914;
+            color: white;
+            font-weight: bold;
+            padding: 8px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        .apply-filters:hover {
+            background: #ff1e2d;
+        }
+        
+        /* Autocomplete styles */
+        .autocomplete-container {
+            position: relative;
+        }
+        
+        .autocomplete-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: #333;
+            border: 1px solid #555;
+            border-top: none;
+            border-radius: 0 0 4px 4px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 10;
+        }
+        
+        .autocomplete-item {
+            padding: 8px 10px;
+            cursor: pointer;
+        }
+        
+        .autocomplete-item:hover {
+            background: #444;
+        }
+    </style>
 </head>
 <body>
     <header>
@@ -12,73 +258,101 @@
             <a href="/home" class="logo">LITFLIX</a>
             <div class="search-container">
                 <form id="search-form" action="/searchPage" method="GET">
-                    <input id="search-input" type="text" name="q" placeholder="Search by Genre, Author, or Title">
+                    <input id="search-input" type="text" name="q" placeholder="Search by Genre, Author, or Title" value="<%= searchQuery %>">
                     <button type="submit" class="search-btn">🔍</button>
                 </form>
             </div>
             <a href="/myShelf" class="my-shelf-btn">My Shelf</a>
         </nav>
     </header>
+    
     <main>
-
-        <h1>Search Results for "<%= searchQuery %>"</h1>
+        <div class="search-results">
+            <div class="search-header">
+                <h1>Search Results<% if(searchQuery) { %> for "<%= searchQuery %>"<% } %></h1>
+                <span class="results-count"><%= books.length %> books found</span>
+            </div>
 
             <% if (!books || books.length === 0) { %>
-                <p>No results found. Try a different search.</p>
+                <div class="no-results">
+                    <h2>No results found</h2>
+                    <p>Try adjusting your search terms or filters</p>
+                </div>
             <% } else { %>
-              <ul class="book-list">
-                <% books.forEach(book => { %>
-                  <li class="book">
-                    <img src="<%= book.cover_image_url %>" alt="<%= book.title %>">
-                    <div>
-                      <a href="<%= book.gutenberg_url %>" target="_blank"><%= book.title %></a>
-                      <p>by <%= book.author_name %></p>
-                    </div>
-                  </li>
-                <% }) %>
-              </ul>
+                <div class="book-grid">
+                    <% books.forEach(book => { %>
+                        <div class="book-card" data-book-id="<%= book.gutenberg_id %>">
+                            <img src="<%= book.cover_image_url || 'https://via.placeholder.com/150x225?text=No+Cover' %>" 
+                                 alt="<%= book.title %>" class="book-cover">
+                            <div class="book-info">
+                                <h3 class="book-title"><%= book.title %></h3>
+                                <div class="book-author"><%= book.authors || 'Unknown Author' %></div>
+                                <div class="book-genre"><%= book.genres || 'Uncategorized' %></div>
+                                <div class="book-actions">
+                                    <button class="book-btn view-details-btn">Details</button>
+                                    <button class="book-btn primary add-to-shelf-btn">Add to Shelf</button>
+                                </div>
+                            </div>
+                        </div>
+                    <% }) %>
+                </div>
             <% } %>
-       
+        </div>
 
         <!-- Filter Sidebar -->
         <div id="filter-sidebar" class="filter-sidebar">
             <div id="filter-toggle" class="filter-toggle">❯</div>
             <div class="filter-content">
                 <h3>Filter Books</h3>
-                <label for="genre-filter">Genre:</label>
-                <select id="genre-filter">
-                    <option value="">All</option>
-                    <option value="fiction">Fiction</option>
-                    <option value="non-fiction">Non-Fiction</option>
-                    <option value="fantasy">Fantasy</option>
-                    <option value="mystery">Mystery</option>
-                </select>
+                <form id="filter-form" action="/searchPage" method="GET">
+                    <!-- Keep the search query -->
+                    <input type="hidden" name="q" value="<%= searchQuery %>">
+                    
+                    <div class="filter-group">
+                        <label for="genre-filter" class="filter-title">Genre:</label>
+                        <div class="autocomplete-container">
+                            <input type="text" id="genre-filter" name="genre" placeholder="Enter genre" 
+                                   value="<%= filters?.genre || '' %>">
+                            <div id="genre-suggestions" class="autocomplete-results" style="display: none;"></div>
+                        </div>
+                    </div>
 
-                <label for="author-filter">Author:</label>
-                <input type="text" id="author-filter" placeholder="Search by Author">
+                    <div class="filter-group">
+                        <label for="author-filter" class="filter-title">Author:</label>
+                        <div class="autocomplete-container">
+                            <input type="text" id="author-filter" name="author" placeholder="Search by Author"
+                                   value="<%= filters?.author || '' %>">
+                            <div id="author-suggestions" class="autocomplete-results" style="display: none;"></div>
+                        </div>
+                    </div>
 
-                <label for="rating-filter">Rating:</label>
-                <input type="range" id="rating-filter" min="1" max="5" step="0.5">
+                    <div class="filter-group">
+                        <label for="year-filter" class="filter-title">Year:</label>
+                        <input type="text" id="year-filter" name="year" placeholder="Publication year"
+                               value="<%= filters?.year || '' %>">
+                    </div>
 
-                <label for="year-filter">Year:</label>
-                <input type="number" id="year-filter" placeholder="YYYY">
+                    <div class="filter-group">
+                        <label for="format-filter" class="filter-title">Format:</label>
+                        <select id="format-filter" name="format">
+                            <option value="">All</option>
+                            <option value="Text" <%= filters?.format === 'Text' ? 'selected' : '' %>>Text</option>
+                            <option value="PDF" <%= filters?.format === 'PDF' ? 'selected' : '' %>>PDF</option>
+                            <option value="EPUB" <%= filters?.format === 'EPUB' ? 'selected' : '' %>>EPUB</option>
+                        </select>
+                    </div>
 
-                <label for="format-filter">Format:</label>
-                <select id="format-filter">
-                    <option value="">All</option>
-                    <option value="ebook">E-Book</option>
-                    <option value="audiobook">Audiobook</option>
-                    <option value="hardcover">Hardcover</option>
-                </select>
-
-                <button id="apply-filters" class="apply-filters">Apply Filters</button>
+                    <div class="filter-actions">
+                        <button type="button" id="reset-filters" class="reset-filters">Reset</button>
+                        <button type="submit" id="apply-filters" class="apply-filters">Apply Filters</button>
+                    </div>
+                </form>
             </div>
         </div>
-
-
     </main>
-       <!-- Modal Window -->
-       <div id="book-modal" class="modal">
+
+    <!-- Book Details Modal -->
+    <div id="book-modal" class="modal" style="display: none;">
         <div class="modal-content">
             <span class="close">&times;</span>
             <div class="modal-body">
@@ -97,6 +371,167 @@
             </div>
         </div>
     </div>
-    <script src="../static/script.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Filter sidebar toggle
+            const filterSidebar = document.getElementById('filter-sidebar');
+            const filterToggle = document.getElementById('filter-toggle');
+
+            if (filterToggle && filterSidebar) {
+                filterToggle.addEventListener('click', () => {
+                    filterSidebar.classList.toggle('open');
+                    filterToggle.innerHTML = filterSidebar.classList.contains('open') ? '❮' : '❯';
+                });
+
+                // Close sidebar when clicking outside
+                window.addEventListener('click', (event) => {
+                    if (!filterSidebar.contains(event.target) && event.target !== filterToggle) {
+                        filterSidebar.classList.remove('open');
+                        filterToggle.innerHTML = '❯';
+                    }
+                });
+            }
+
+            // Reset filters button
+            const resetFiltersBtn = document.getElementById('reset-filters');
+            if (resetFiltersBtn) {
+                resetFiltersBtn.addEventListener('click', () => {
+                    document.getElementById('genre-filter').value = '';
+                    document.getElementById('author-filter').value = '';
+                    document.getElementById('year-filter').value = '';
+                    document.getElementById('format-filter').value = '';
+                    
+                    // Keep the search query but clear filters
+                    const searchQuery = new URLSearchParams(window.location.search).get('q') || '';
+                    window.location.href = `/searchPage${searchQuery ? `?q=${encodeURIComponent(searchQuery)}` : ''}`;
+                });
+            }
+
+            // Book details modal
+            const modal = document.getElementById('book-modal');
+            const closeModal = document.querySelector('.close');
+            const closeModalBtn = document.getElementById('close-modal');
+            
+            // View details button click
+            document.querySelectorAll('.view-details-btn').forEach(btn => {
+                btn.addEventListener('click', async function() {
+                    const bookId = this.closest('.book-card').dataset.bookId;
+                    
+                    try {
+                        const response = await fetch(`/api/books/${bookId}`);
+                        if (!response.ok) throw new Error('Failed to fetch book details');
+                        
+                        const bookData = await response.json();
+                        
+                        document.getElementById('book-image').src = bookData.cover_image_url;
+                        document.getElementById('book-title').textContent = bookData.title;
+                        document.getElementById('book-author').textContent = bookData.author;
+                        document.getElementById('book-genre').textContent = bookData.genre;
+                        document.getElementById('book-description').textContent = bookData.description;
+                        
+                        modal.style.display = 'block';
+                    } catch (error) {
+                        console.error('Error fetching book details:', error);
+                        alert('Could not load book details. Please try again.');
+                    }
+                });
+            });
+            
+            // Close modal
+            if (closeModal) {
+                closeModal.addEventListener('click', () => {
+                    if (modal) modal.style.display = 'none';
+                });
+            }
+            
+            if (closeModalBtn) {
+                closeModalBtn.addEventListener('click', () => {
+                    if (modal) modal.style.display = 'none';
+                });
+            }
+            
+            window.addEventListener('click', (e) => {
+                if (modal && e.target === modal) modal.style.display = 'none';
+            });
+
+            // Add to shelf functionality
+            document.querySelectorAll('.add-to-shelf-btn, #add-to-shelf-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const bookId = this.closest('.book-card')?.dataset.bookId || 
+                                  document.querySelector('.view-details-btn')?.closest('.book-card')?.dataset.bookId;
+                    
+                    if (bookId) {
+                        alert(`Book added to your shelf! (ID: ${bookId})`);
+                        // will implement the actual shelf adding functionality
+                    }
+                });
+            });
+
+            // Autocomplete for genre filter
+            setupAutocomplete('genre-filter', 'genre-suggestions', 'genre');
+            
+            // Autocomplete for author filter
+            setupAutocomplete('author-filter', 'author-suggestions', 'author');
+            
+            function setupAutocomplete(inputId, suggestionsId, type) {
+                const input = document.getElementById(inputId);
+                const suggestionsContainer = document.getElementById(suggestionsId);
+                
+                if (!input || !suggestionsContainer) return;
+                
+                let debounceTimer;
+                
+                input.addEventListener('input', function() {
+                    clearTimeout(debounceTimer);
+                    const term = this.value.trim();
+                    
+                    if (term.length < 2) {
+                        suggestionsContainer.style.display = 'none';
+                        return;
+                    }
+                    
+                    debounceTimer = setTimeout(async () => {
+                        try {
+                            const response = await fetch(`/api/filter-suggestions?type=${type}&term=${encodeURIComponent(term)}`);
+                            if (!response.ok) throw new Error('Failed to fetch suggestions');
+                            
+                            const suggestions = await response.json();
+                            
+                            if (suggestions.length === 0) {
+                                suggestionsContainer.style.display = 'none';
+                                return;
+                            }
+                            
+                            suggestionsContainer.innerHTML = '';
+                            suggestions.forEach(suggestion => {
+                                const item = document.createElement('div');
+                                item.className = 'autocomplete-item';
+                                item.textContent = suggestion;
+                                item.addEventListener('click', () => {
+                                    input.value = suggestion;
+                                    suggestionsContainer.style.display = 'none';
+                                });
+                                suggestionsContainer.appendChild(item);
+                            });
+                            
+                            suggestionsContainer.style.display = 'block';
+                        } catch (error) {
+                            console.error(`Error fetching ${type} suggestions:`, error);
+                        }
+                    }, 300);
+                });
+                
+                // Hide suggestions when clicking outside
+                document.addEventListener('click', function(e) {
+                    if (e.target !== input && e.target !== suggestionsContainer) {
+                        suggestionsContainer.style.display = 'none';
+                    }
+                });
+            }
+        });
+    </script>
 </body>
 </html>
+
+

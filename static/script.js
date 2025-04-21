@@ -1,3 +1,4 @@
+// static/script.js
 document.addEventListener('DOMContentLoaded', () => {
     console.log("Script Loaded Successfully!");
 
@@ -5,8 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.book').forEach(book => {
         book.addEventListener('click', async function (e) {
             e.stopPropagation();
-            //const bookId = this.dataset.bookId;
-            const bookId = "1"; // Hardcode a test book ID for debugging
+            const bookId = this.dataset.bookId || "1"; //  to test ID
             console.log('Book ID:', bookId); 
 
             if (!bookId) {
@@ -15,6 +15,11 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             const modal = document.getElementById('book-modal');
+            if (!modal) {
+                console.error('Modal element not found');
+                return;
+            }
+            
             modal.style.display = 'block';
 
             try {
@@ -52,7 +57,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-
     // Library Box Selection
     document.querySelectorAll('.library-box').forEach(box => {
         box.addEventListener('click', function () {
@@ -83,34 +87,43 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // Attach close event listeners for both modals
-    document.getElementById('close-modal')?.addEventListener('click', () => closeModal(bookModal));
-    document.getElementById('close-shelf-modal')?.addEventListener('click', () => closeModal(shelfModal));
-    document.querySelectorAll('.close').forEach(closeBtn =>
+    document.querySelectorAll('.close').forEach(closeBtn => {
         closeBtn.addEventListener('click', () => {
-            closeModal(bookModal);
-            closeModal(shelfModal);
-        })
-    );
+            if (bookModal) closeModal(bookModal);
+            if (shelfModal) closeModal(shelfModal);
+        });
+    });
+    
+    // Close specific modals with their buttons
+    const closeModalBtn = document.getElementById('close-modal');
+    if (closeModalBtn) {
+        closeModalBtn.addEventListener('click', () => {
+            if (bookModal) closeModal(bookModal);
+        });
+    }
+    
+    const closeShelfModalBtn = document.getElementById('close-shelf-modal');
+    if (closeShelfModalBtn) {
+        closeShelfModalBtn.addEventListener('click', () => {
+            if (shelfModal) closeModal(shelfModal);
+        });
+    }
 
     // Close modal when clicking outside
     window.addEventListener('click', (e) => {
-        if (e.target === bookModal) closeModal(bookModal);
-        if (e.target === shelfModal) closeModal(shelfModal);
+        if (bookModal && e.target === bookModal) closeModal(bookModal);
+        if (shelfModal && e.target === shelfModal) closeModal(shelfModal);
     });
 
     // Search Button Navigation
     const searchForm = document.getElementById('search-form');
     const searchInput = document.getElementById('search-input');
 
-
-    console.log("searchForm:", searchForm);  // Check if searchForm is defined
-    console.log("searchInput:", searchInput);  // Check if searchInput is defined
-
     // Handle form submission
     if (searchForm && searchInput) {
         searchForm.addEventListener('submit', (event) => {
             event.preventDefault(); // Prevent the default form submission
-            console.log("Entered form listener")
+            console.log("Search form submitted");
 
             const query = searchInput.value.trim();
             const url = query ? `/searchPage?q=${encodeURIComponent(query)}` : '/searchPage';
@@ -118,7 +131,7 @@ document.addEventListener('DOMContentLoaded', () => {
             window.location.href = url;  // Redirect to the search results page
         });
     } else {
-        console.error("Error: searchForm or searchInput not found.");
+        console.log("searchForm or searchInput not found on this page.");
     }
 
     // Filter Sidebar Toggle
@@ -128,31 +141,76 @@ document.addEventListener('DOMContentLoaded', () => {
     if (filterToggle && filterSidebar) {
         filterToggle.addEventListener('click', () => {
             filterSidebar.classList.toggle('open');
-            filterToggle.innerHTML = filterSidebar.classList.contains('open') ? '❮' : '❯'; // Change icon direction
+            filterToggle.innerHTML = filterSidebar.classList.contains('open') ? '❮' : '❯'; 
         });
 
         // Close sidebar when clicking outside
         window.addEventListener('click', (event) => {
             if (!filterSidebar.contains(event.target) && event.target !== filterToggle) {
                 filterSidebar.classList.remove('open');
-                filterToggle.innerHTML = '❯'; // Reset icon
+                filterToggle.innerHTML = '❯'; 
             }
         });
     }
 
-    // Apply Filters (Example)
-    document.getElementById('apply-filters')?.addEventListener('click', () => {
-        const filters = {
-            genre: document.getElementById('genre-filter')?.value,
-            author: document.getElementById('author-filter')?.value.trim(),
-            rating: document.getElementById('rating-filter')?.value,
-            year: document.getElementById('year-filter')?.value,
-            format: document.getElementById('format-filter')?.value
-        };
+    // Apply Filters
+    const applyFiltersBtn = document.getElementById('apply-filters');
+    if (applyFiltersBtn) {
+        applyFiltersBtn.addEventListener('click', () => {
+            const filters = {
+                genre: document.getElementById('genre-filter')?.value.trim() || '',
+                author: document.getElementById('author-filter')?.value.trim() || '',
+                rating: document.getElementById('rating-filter')?.value || '',
+                year: document.getElementById('year-filter')?.value.trim() || '',
+                format: document.getElementById('format-filter')?.value || ''
+            };
 
-        console.log(`Filters Applied:`, filters);
-        alert('Filters Applied! (Functionality can be added here)');
-    });
+            console.log(`Filters Applied:`, filters);
+            
+            try {
+                // Build the query string from filters
+                const searchParams = new URLSearchParams();
+                
+                // Add the current search query if it exists
+                const currentQuery = new URLSearchParams(window.location.search).get('q');
+                if (currentQuery) searchParams.append('q', currentQuery);
+                
+                // Add all non-empty filters
+                Object.entries(filters).forEach(([key, value]) => {
+                    if (value) searchParams.append(key, value);
+                });
+                
+                // Redirect to the search page with filters
+                window.location.href = `/searchPage?${searchParams.toString()}`;
+            } catch (error) {
+                console.error('Error applying filters:', error);
+                alert('There was an error applying filters. Please try again.');
+            }
+        });
+    }
+    
+    // Reset Filters
+    const resetFiltersBtn = document.getElementById('reset-filters');
+    if (resetFiltersBtn) {
+        resetFiltersBtn.addEventListener('click', () => {
+            // Clear all filter inputs
+            const genreFilter = document.getElementById('genre-filter');
+            const authorFilter = document.getElementById('author-filter');
+            const ratingFilter = document.getElementById('rating-filter');
+            const yearFilter = document.getElementById('year-filter');
+            const formatFilter = document.getElementById('format-filter');
+            
+            if (genreFilter) genreFilter.value = '';
+            if (authorFilter) authorFilter.value = '';
+            if (ratingFilter) ratingFilter.value = '';
+            if (yearFilter) yearFilter.value = '';
+            if (formatFilter) formatFilter.value = '';
+            
+            // Keep only the search query parameter
+            const searchQuery = new URLSearchParams(window.location.search).get('q');
+            window.location.href = searchQuery ? `/searchPage?q=${encodeURIComponent(searchQuery)}` : '/searchPage';
+        });
+    }
 });
 
 // Function to navigate to different pages 

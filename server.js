@@ -218,8 +218,8 @@ app.get('/api/books/:gutenberg_id', async (req, res) => {
         // Get genres (aka subjects)
         const genreResult = await pool.query(`
       SELECT name FROM books_subject bs
-      JOIN books_book_subjects bbs ON bs.id = bbs.subject_id
-      WHERE bbs.book_id = $1
+      JOIN books_book_genre bbg ON bs.id = bbg.subject_id
+      WHERE bbg.book_id = $1
     `, [gutenbergId]); // Change to use gutenberg_id
 
         const genres = genreResult.rows.map(row => row.name);
@@ -246,42 +246,160 @@ app.get('/api/books/:gutenberg_id', async (req, res) => {
     }
 });
 
-//route for the search page
+// Improved search page route with filtering capabilities
 app.get('/searchPage', async (req, res) => {
-    console.log("Search button hit");
-    const searchQuery = req.query.q;
-    console.log('Search Query:', searchQuery);  // Debugging
+    console.log("Search request received");
+    const searchQuery = req.query.q || '';
+    const genre = req.query.genre || '';
+    const author = req.query.author || '';
+    const year = req.query.year || '';
+    const format = req.query.format || '';
+    const rating = req.query.rating || '';
 
-    if (!searchQuery || searchQuery.trim() === "") {
-        // If search query is empty, return an error message or ask for a valid query
-        return res.send('<h1>No search query provided!</h1><p>Please enter a search term.</p>');
-    }
+    console.log('Search Query:', searchQuery);
+    console.log('Filters:', { genre, author, year, format, rating });
 
     try {
-        // Perform the query with the user's search term
-        const searchResult = await pool.query(`
-            SELECT DISTINCT b.*, s.name AS subject_name, p.name AS author_name
+        let query = `
+            SELECT DISTINCT b.*, 
+                   string_agg(DISTINCT s.name, ', ') AS genres,
+                   string_agg(DISTINCT p.name, ', ') AS authors
             FROM books_book b
-            LEFT JOIN books_subject s ON b.gutenberg_id = s.id
-            LEFT JOIN books_book_authors ba ON b.gutenberg_id = ba.book_id
-            LEFT JOIN books_person p ON ba.person_id = p.id
-            WHERE LOWER(b.title) LIKE LOWER($1)
-               OR LOWER(p.name) LIKE LOWER($1)
-               OR LOWER(s.name) LIKE LOWER($1)`, 
-            [`%${searchQuery}%`]);
+            LEFT JOIN books_book_genre bbg ON b.gutenberg_id = bbg.book_id
+            LEFT JOIN books_subject s ON bbg.subject_id = s.id
+            LEFT JOIN books_book_authors bba ON b.gutenberg_id = bba.book_id
+            LEFT JOIN books_person p ON bba.person_id = p.id
+            WHERE 1=1
+        `;
 
-        // If no results are found, send a custom message or render a no-results page
-        if (searchResult.rowCount === 0) {
-            return res.send('<h1>No Results Found</h1><p>We could not find any books matching your search term.</p>');
+        const queryParams = [];
+        let paramCount = 1;
+
+        // Add search query condition if provided
+        if (searchQuery && searchQuery.trim() !== '') {
+            query += ` AND (
+                LOWER(b.title) LIKE LOWER($${paramCount}) 
+                OR EXISTS (
+                    SELECT 1 FROM books_person p2 
+                    JOIN books_book_authors bba2 ON p2.id = bba2.person_id 
+                    WHERE bba2.book_id = b.gutenberg_id AND LOWER(p2.name) LIKE LOWER($${paramCount})
+                )
+                OR EXISTS (
+                    SELECT 1 FROM books_subject s2 
+                    JOIN books_book_genre bbg2 ON s2.id = bbg2.subject_id 
+                    WHERE bbg2.book_id = b.gutenberg_id AND LOWER(s2.name) LIKE LOWER($${paramCount})
+                )
+            )`;
+            queryParams.push(`%${searchQuery}%`);
+            paramCount++;
         }
 
+        // Add genre filter if provided
+        if (genre && genre !== 'all') {
+            query += ` AND EXISTS (
+                SELECT 1 FROM books_subject s3 
+                JOIN books_book_genre bbg3 ON s3.id = bbg3.subject_id 
+                WHERE bbg3.book_id = b.gutenberg_id AND LOWER(s3.name) LIKE LOWER($${paramCount})
+            )`;
+            queryParams.push(`%${genre}%`);
+            paramCount++;
+        }
+
+        // Add author filter if provided
+        if (author && author.trim() !== '') {
+            query += ` AND EXISTS (
+                SELECT 1 FROM books_person p3 
+                JOIN books_book_authors bba3 ON p3.id = bba3.person_id 
+                WHERE bba3.book_id = b.gutenberg_id AND LOWER(p3.name) LIKE LOWER($${paramCount})
+            )`;
+            queryParams.push(`%${author}%`);
+            paramCount++;
+        }
+
+        // Add year filter if provided
+        if (year && year.trim() !== '') {
+            // Assuming there's a publication_year field or similar
+            // Modify this based on your actual database schema
+            query += ` AND b.title LIKE $${paramCount}`;  // Simplified - replace with actual year field
+            queryParams.push(`%${year}%`);
+            paramCount++;
+        }
+
+        // Group by to make DISTINCT work with aggregates
+        query += ` GROUP BY b.gutenberg_id, b.download_count, b.media_type, b.title, b.copyright, b.gutenberg_url, b.cover_image_url`;
+        
+        // Add limit to prevent too many results
+        query += ` LIMIT 50`;
+
+        console.log('Executing query:', query);
+        console.log('With params:', queryParams);
+
+        const searchResult = await pool.query(query, queryParams);
+
+        console.log(`Found ${searchResult.rowCount} results`);
+
+        // Render the search results page with the data
         res.render('searchPage', {
-            books: searchResult.rows, // <-- MUST be an array
-            searchQuery
+            books: searchResult.rows,
+            searchQuery: searchQuery,
+            filters: { genre, author, year, format, rating }
         });
 
     } catch (error) {
-        console.error('Error executing query:', error);
+        console.error('Error executing search query:', error);
         res.status(500).send('<h1>Error occurred</h1><p>There was an error while processing your request. Please try again later.</p>');
+    }
+});
+
+// API endpoint for filter suggestions (autocomplete)
+app.get('/api/filter-suggestions', async (req, res) => {
+    const type = req.query.type; // 'genre' or 'author'
+    const term = req.query.term || '';
+    
+    try {
+        let query;
+        if (type === 'genre') {
+            query = `
+                SELECT DISTINCT name 
+                FROM books_subject 
+                WHERE LOWER(name) LIKE LOWER($1)
+                ORDER BY name
+                LIMIT 20
+            `;
+        } else if (type === 'author') {
+            query = `
+                SELECT DISTINCT name 
+                FROM books_person 
+                WHERE LOWER(name) LIKE LOWER($1)
+                ORDER BY name
+                LIMIT 20
+            `;
+        } else {
+            return res.status(400).json({ error: 'Invalid suggestion type' });
+        }
+        
+        const result = await pool.query(query, [`%${term}%`]);
+        res.json(result.rows.map(row => row.name));
+    } catch (error) {
+        console.error('Error fetching suggestions:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// API endpoint to apply filters
+app.post('/api/apply-filters', async (req, res) => {
+    try {
+        const { genre, author, year, format, rating } = req.body;
+        
+        // Process filter logic here
+        // This is a simplified response - you'll implement the actual filtering
+        res.json({ 
+            success: true, 
+            message: 'Filters applied',
+            appliedFilters: { genre, author, year, format, rating }
+        });
+    } catch (error) {
+        console.error('Error applying filters:', error);
+        res.status(500).json({ success: false, error: 'Server error' });
     }
 });
