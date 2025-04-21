@@ -168,8 +168,24 @@ input[type="text"] {
 .book-list {
     display: flex;
     overflow-x: auto;
+    padding-bottom: 10px;
     gap: 1rem;
-    padding-bottom: 1rem;
+    scroll-behavior: smooth;
+}
+
+.book-list::-webkit-scrollbar {
+    height: 8px;
+}
+
+.book-list::-webkit-scrollbar-thumb {
+    background-color: #ccc;
+    border-radius: 4px;
+}
+
+.book {
+    flex: 0 0 auto;
+    width: 120px;
+    text-align: center;
 }
 
 .book {

@@ -33,17 +33,36 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Search Button Navigation
-    const searchBtn = document.getElementById('search-btn');
+    // Search Functionality
+    const searchBtn = document.querySelector('.search-btn');
     const searchInput = document.getElementById('search-input');
-
-    searchBtn?.addEventListener('click', () => {
-        const query = searchInput?.value.trim();
-        window.location.href = query
-            ? `searchPage.html?query=${encodeURIComponent(query)}`
-            : 'searchPage.html';
-    });
-
+    
+    // Function to perform the search
+    function performSearch() {
+        const query = searchInput.value.trim();
+        if (query) {
+            window.location.href = `/searchPage?query=${encodeURIComponent(query)}`;
+        } else {
+            window.location.href = `/searchPage`;
+        }
+    }
+    
+    // Handle search button click
+    if (searchBtn && searchInput) {
+        searchBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            performSearch();
+        });
+    
+        // Handle Enter key press inside the input
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                performSearch();
+            }
+        });
+    }
+    
     // Filter Sidebar Toggle
     const filterSidebar = document.getElementById('filter-sidebar');
     const filterToggle = document.getElementById('filter-toggle');
@@ -173,8 +192,7 @@ async function loadUserShelf(username) {
   }
 }
 
-// Comprehensive openBookModal function that handles all use cases
-function openBookModal(title, author, genre, description = "No description available.", imageSrc = "", bookId = null, downloads = 0) {
+function openBookModal(title, author, genre, description = "No description available.", imageSrc = "", bookId = null, downloads = 0, downloadUrl = "") {
     const modal = document.getElementById('shelf-modal') || document.getElementById('book-modal');
     if (modal) {
         const imgEl = modal.querySelector('.modal-book-img') || modal.querySelector('#book-image');
@@ -190,43 +208,31 @@ function openBookModal(title, author, genre, description = "No description avail
         if (genreEl) genreEl.textContent = genre;
         if (descEl) descEl.textContent = description;
         if (dlEl) dlEl.textContent = downloads;
-        
-        // Store the book ID as a data attribute on the modal
+
         if (bookId) modal.dataset.bookId = bookId;
 
-        // Set up the download button
+        // ✅ Download button logic
         const downloadBtn = modal.querySelector('#download-btn');
-        if (downloadBtn && bookId) {
-            downloadBtn.onclick = async () => {
-                try {
-                    await fetch('/api/increment-download', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ bookId })
-                    });
-                    alert('Download started!');
-                    // update counter in UI
-                    if (dlEl) dlEl.textContent = parseInt(dlEl.textContent) + 1;
-                } catch(err) {
-                    console.error('Download error:', err);
-                    alert('Failed to bump download count');
+        if (downloadBtn) {
+            downloadBtn.onclick = () => {
+                if (downloadUrl) {
+                    window.open(downloadUrl, '_blank');
+                } else {
+                    alert("Download not available for this book.");
                 }
             };
         }
-        
-        // Set up the Add to Shelf button
+
         const addToShelfBtn = document.getElementById('add-to-shelf-btn');
         if (addToShelfBtn && bookId) {
             addToShelfBtn.onclick = () => addBookToShelf(bookId);
         }
-        
-        // Set up the Remove from Shelf button
+
         const removeFromShelfBtn = document.getElementById('remove-from-shelf');
         if (removeFromShelfBtn && bookId) {
             removeFromShelfBtn.onclick = () => removeBookFromShelf(bookId);
         }
 
-        // Display the modal
         modal.style.display = 'flex';
     }
 }

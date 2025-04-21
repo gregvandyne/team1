@@ -18,7 +18,25 @@
         </nav>
     </header>
     <main>
-        <div id="book-search" class="book-list"></div>
+        <section class="book-row">
+            <h2>Search Results for "{{ query }}"</h2>
+            {% if books %}
+                <div class="book-list">
+                    {% for book in books %}
+                        <div class="book" onclick="openBookModal('{{ book.title }}', '{{ book.author }}', '', '', '{{ book.cover_image_url }}', '{{ book.id }}', 0, '{{ book.download_url }}')">
+                            <img src="{{ book.cover_image_url or '../static/placeholder_book.jpg' }}" alt="{{ book.title }}">
+                            <p class="book-title">{{ book.title }}</p>
+                            {% if book.author != 'Unknown' %}
+                                <p class="book-author">{{ book.author }}</p>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p style="text-align:center; margin-top:20px;">No results found for "{{ query }}".</p>
+            {% endif %}
+            <div class="grey-divider"></div>
+        </section>   
         <!-- Filter Sidebar -->
         <div id="filter-sidebar" class="filter-sidebar">
             <div id="filter-toggle" class="filter-toggle">❯</div>
@@ -56,26 +74,27 @@
 
 
     </main>
-       <!-- Modal Window -->
-       <div id="book-modal" class="modal">
+    <!-- Modal Window -->
+    <div id="book-modal" class="modal">
         <div class="modal-content">
-            <span class="close">&times;</span>
+            <span class="close" onclick="closeBookModal()">&times;</span>
             <div class="modal-body">
-                <img id="book-image" class="modal-book-image" src="" alt="Book Image">
-                <div class="book-details">
+                <img id="book-image" src="" alt="Book Cover" class="modal-book-img">
+                <div class="modal-details">
                     <h2 id="book-title"></h2>
                     <p><strong>Author:</strong> <span id="book-author"></span></p>
                     <p><strong>Genre:</strong> <span id="book-genre"></span></p>
-                    <p><strong>Description:</strong> <span id="book-description"></span></p>
-                    <div class="modal-actions">
+                    <p id="book-description"></p>
+                    <div class="modal-buttons">
                         <button id="add-to-shelf-btn">Add to My Shelf</button>
                         <button id="download-btn">Download</button>
-                        <button id="close-modal">Close</button>
+                        <button id="close-modal" onclick="closeBookModal()">Close</button>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
     <script src="../static/script.js"></script>
 </body>
 </html>
