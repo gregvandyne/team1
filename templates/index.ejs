@@ -11,8 +11,10 @@
         <nav>
             <a href="/home" class="logo">LITFLIX</a>
             <div class="search-container">
-                <input id="search-input" type="text" placeholder="Search by Genre, Author, or Title">
-                <a href="/searchPage" class="search-btn">🔍</a>
+            <form action="/searchPage" method="GET">
+                <input id="search-input" type="text" name="q" placeholder="Search by Genre, Author, or Title">
+                <button type="submit" class="search-btn">🔍</button>
+                </form>
             </div>
             <a href="/myShelf" class="my-shelf-btn">My Shelf</a>
         </nav>
@@ -30,28 +32,14 @@
              </div>
         </section>
         
-        <!-- Loop over the booksBySection object -->
-        <% Object.entries(booksBySection).forEach(([sectionId, books]) => { %>
-            <section class="book-row">
-                <h2>Books in Section <%= sectionId %></h2>
-                <div class="book-list">
-                    <% books.forEach(book => { %>
-                        <div class="book" data-id="<%= book.id %>">
-                            <img src="<%= book.imageUrl %>" alt="<%= book.title %>">
-                            <p><%= book.title %></p>
-                        </div>
-                    <% }) %>
-                </div>
-            </section>
-        <% }) %>
 
         <!-- Continue Reading, sectionID=1  -->
         <section class="book-row">
             <h2>Continue Reading</h2>
             <div class="book-list">
                 <% booksBySection['1'] && booksBySection['1'].forEach(book => { %> 
-                    <div class="book" data-id="<%= book.id %>">
-                        <img src="<%= book.imageUrl %>" alt="<%= book.title %>">
+                    <div class="book" data-book-id="<%= book.id %>">
+                        <img src="<%= book.cover_image_url %>" alt="<%= book.title %>">
                         <p><%= book.title %></p>
                     </div>
                 <% }) %>
@@ -63,8 +51,8 @@
             <h2>New to Our Shelves</h2>
             <div class="book-list">
                 <% booksBySection['2'] && booksBySection['2'].forEach(book => { %> 
-                    <div class="book" data-id="<%= book.id %>">
-                        <img src="<%= book.imageUrl %>" alt="<%= book.title %>">
+                    <div class="book" data-book-id="<%= book.id %>">
+                        <img src="<%= book.cover_image_url %>" alt="<%= book.title %>">
                         <p><%= book.title %></p>
                     </div>
                 <% }) %>
@@ -74,10 +62,10 @@
         <!-- Science Fiction & Fantasy, sectionID=3  -->
         <section class="book-row">
             <h2>Science Fiction & Fantasy</h2>
-            <div class="book-list">
+            <div class="book-list" >
                 <% booksBySection['3'] && booksBySection['3'].forEach(book => { %> 
-                    <div class="book" data-id="<%= book.id %>">
-                        <img src="<%= book.imageUrl %>" alt="<%= book.title %>">
+                    <div class="book" data-book-id="<%= book.id %>">
+                        <img src="<%= book.cover_image_url %>" alt="<%= book.title %>">
                         <p><%= book.title %></p>
                     </div>
                 <% }) %>
@@ -89,21 +77,21 @@
             <h2>Mystery & Thriller</h2>
             <div class="book-list">
                 <% booksBySection['4'] && booksBySection['4'].forEach(book => { %> 
-                    <div class="book" data-id="<%= book.id %>">
-                        <img src="<%= book.imageUrl %>" alt="<%= book.title %>">
+                    <div class="book" data-book-id="<%= book.id %>">
+                        <img src="<%= book.cover_image_url %>" alt="<%= book.title %>">
                         <p><%= book.title %></p>
                     </div>
                 <% }) %>
             </div>
         </section>
-
+        
         <!-- Biographies & Memoirs, sectionID=5  -->
         <section class="book-row">
             <h2>Biographies & Memoirs</h2>
             <div class="book-list">
                 <% booksBySection['5'] && booksBySection['5'].forEach(book => { %> 
-                    <div class="book" data-id="<%= book.id %>">
-                        <img src="<%= book.imageUrl %>" alt="<%= book.title %>">
+                    <div class="book" data-book-id="<%= book.id %>">
+                       <img src="<%= book.cover_image_url %>" alt="<%= book.title %>">
                         <p><%= book.title %></p>
                     </div>
                 <% }) %>

@@ -1,35 +1,37 @@
 document.addEventListener('DOMContentLoaded', () => {
+    console.log("Script Loaded Successfully!");
+
     // Book Hover Effect
     document.querySelectorAll('.book').forEach(book => {
         book.addEventListener('click', async function (e) {
-            e.stopPropagation(); // Prevent unintended triggers
+            e.stopPropagation();
+            //const bookId = this.dataset.bookId;
+            const bookId = "1"; // Hardcode a test book ID for debugging
+            console.log('Book ID:', bookId); 
 
-            const isShelfPage = document.getElementById('shelf-books') !== null; //check if yout on myShelf page or not
-            const bookId = this.dataset.bookId; // Assume each book div has a `data-id` attribute with the book's ID
-            //const modal = document.getElementById('book-modal'); // or shelfModal depending on the page
-            const modal = isShelfPage ? shelfModal : bookModal; //use shelfMondal of on myShelf page, bookModal if not
-            const prefix = isShelfPage ? 'shelf' : 'book';
+            if (!bookId) {
+                console.error('Book ID is missing.');
+                return;
+            }
 
-            if (!modal) return;
-
+            const modal = document.getElementById('book-modal');
             modal.style.display = 'block';
+
             try {
-            // Fetch real data about the book from the server
-                const response = await fetch(`/book/${bookId}`);
+                // Corrected fetch URL with the bookId parameter
+                const response = await fetch(`/api/books/${bookId}`);
                 const bookData = await response.json();
 
-                // Update the modal with real data
-                document.getElementById('${prefix}-book-image').src = bookData.imageUrl;
-                document.getElementById('${prefix}-book-title').textContent = bookData.title;
-                document.getElementById('${prefix}-book-author').textContent = bookData.author;
-                document.getElementById('${prefix}-book-genre').textContent = bookData.genre;
-                document.getElementById('${prefix}-book-description').textContent = bookData.description;
+                document.getElementById('book-image').src = bookData.cover_image_url;
+                document.getElementById('book-title').textContent = bookData.title;
+                document.getElementById('book-author').textContent = bookData.author;
+                document.getElementById('book-genre').textContent = bookData.genre;
+                document.getElementById('book-description').textContent = bookData.description;
             } catch (error) {
-            console.error('Error fetching book data:', error);
-            }   
+                console.error('Error fetching book data:', error);
+            }
         });
     });
-
 
     // Horizontal Scrolling for Book Lists
     document.querySelectorAll('.book-list').forEach(list => {
@@ -75,28 +77,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (bookModal) bookModal.style.display = 'none';
     if (shelfModal) shelfModal.style.display = 'none';
 
-    // Function to open the correct modal when a book is clicked
-    document.querySelectorAll('.book').forEach(book => {
-        book.addEventListener('click', function (e) {
-            e.stopPropagation(); // Prevent unintended triggers
-
-            const isShelfPage = document.getElementById('shelf-books') !== null; // Detect if on My Shelf page
-            const modal = isShelfPage ? shelfModal : bookModal;
-            if (!modal) return;
-
-            modal.style.display = 'block';
-
-            // Determine which modal content to update
-            const prefix = isShelfPage ? 'shelf' : 'book';
-
-            document.getElementById(`${prefix}-book-image`).src = this.querySelector('img').src;
-            document.getElementById(`${prefix}-book-title`).textContent = this.querySelector('p').textContent;
-            document.getElementById(`${prefix}-book-author`).textContent = "Author Name"; // Replace with real data
-            document.getElementById(`${prefix}-book-genre`).textContent = "Genre"; // Replace with real data
-            document.getElementById(`${prefix}-book-description`).textContent = "This is a sample book description."; // Replace with real data
-        });
-    });
-
     // Function to close modal
     const closeModal = (modal) => {
         if (modal) modal.style.display = 'none';
@@ -119,15 +99,27 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Search Button Navigation
-    const searchBtn = document.getElementById('search-btn');
+    const searchForm = document.getElementById('search-form');
     const searchInput = document.getElementById('search-input');
 
-    searchBtn?.addEventListener('click', () => {
-        const query = searchInput?.value.trim();
-        window.location.href = query
-            ? `searchPage.html?query=${encodeURIComponent(query)}`
-            : 'searchPage.html';
-    });
+
+    console.log("searchForm:", searchForm);  // Check if searchForm is defined
+    console.log("searchInput:", searchInput);  // Check if searchInput is defined
+
+    // Handle form submission
+    if (searchForm && searchInput) {
+        searchForm.addEventListener('submit', (event) => {
+            event.preventDefault(); // Prevent the default form submission
+            console.log("Entered form listener")
+
+            const query = searchInput.value.trim();
+            const url = query ? `/searchPage?q=${encodeURIComponent(query)}` : '/searchPage';
+            console.log("Redirecting to: ", url);  // Check the redirect URL
+            window.location.href = url;  // Redirect to the search results page
+        });
+    } else {
+        console.error("Error: searchForm or searchInput not found.");
+    }
 
     // Filter Sidebar Toggle
     const filterSidebar = document.getElementById('filter-sidebar');

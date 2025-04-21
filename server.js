@@ -51,6 +51,8 @@ app.get('/myShelf', (req, res) => {
 //directs routes for createAccount.html and createAccount.js
 app.use(express.static(__dirname));
 
+app.use(express.static(path.join(__dirname, 'static')));
+
 //serves files from static folder like .css
 app.use(express.static(path.join(__dirname, 'static')));
 // Parse JSON and URL-encoded data
@@ -176,12 +178,7 @@ app.post('/login', async (req, res) => {
 // Start the server
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
-});port
-
-//search Page route
-app.get('/searchPage', (req, res) => {
-    res.sendFile(path.join(__dirname, 'templates', 'searchPage.html'));
-});
+}); 
 
 //featured Page route 
 app.get('/featured', (req, res) => {
@@ -193,58 +190,98 @@ app.get('/collection', (req, res) => {
     res.sendFile(path.join(__dirname, 'templates', 'collection.html'));
 });
 
-//route to get book data when clicked\
-app.get('/api/books/:id', async (req, res) => {
-  const bookId = req.params.id;
+//route to get book data when clicked
+app.get('/api/books/:gutenberg_id', async (req, res) => {
+    const gutenbergId = req.params.gutenberg_id; // Get the Gutenberg ID
 
-  try {
-    // Get book base info
-    const bookResult = await pool.query(`
-      SELECT * FROM books_book WHERE id = $1
-    `, [bookId]);
+    try {
+        // Get book base info using gutenberg_id
+        const bookResult = await pool.query(`
+      SELECT * FROM books_book WHERE gutenberg_id = $1
+    `, [gutenbergId]);
 
-    if (bookResult.rows.length === 0) {
-      return res.status(404).json({ error: 'Book not found' });
-    }
+        if (bookResult.rows.length === 0) {
+            return res.status(404).json({ error: 'Book not found' });
+        }
 
-    const book = bookResult.rows[0];
+        const book = bookResult.rows[0];
 
-    // Get authors
-    const authorsResult = await pool.query(`
+        // Get authors
+        const authorsResult = await pool.query(`
       SELECT name FROM books_person bp
       JOIN books_book_authors bba ON bp.id = bba.person_id
       WHERE bba.book_id = $1
-    `, [bookId]);
+    `, [gutenbergId]); // Change to use gutenberg_id
 
-    const authors = authorsResult.rows.map(row => row.name);
+        const authors = authorsResult.rows.map(row => row.name);
 
-    // Get genres (aka subjects)
-    const genreResult = await pool.query(`
+        // Get genres (aka subjects)
+        const genreResult = await pool.query(`
       SELECT name FROM books_subject bs
       JOIN books_book_subjects bbs ON bs.id = bbs.subject_id
       WHERE bbs.book_id = $1
-    `, [bookId]);
+    `, [gutenbergId]); // Change to use gutenberg_id
 
-    const genres = genreResult.rows.map(row => row.name);
+        const genres = genreResult.rows.map(row => row.name);
 
-    // Get summary
-    const summaryResult = await pool.query(`
+        // Get summary
+        const summaryResult = await pool.query(`
       SELECT text FROM books_summary WHERE book_id = $1
-    `, [bookId]);
+    `, [gutenbergId]); // Change to use gutenberg_id
 
-    const description = summaryResult.rows[0]?.text || 'No description';
+        const description = summaryResult.rows[0]?.text || 'No description';
 
-    // Respond with combined data
-    res.json({
-      title: book.title,
-      author: authors.join(', '),
-      genre: genres.join(', '),
-      description: description,
-      cover_image_url: book.cover_image_url
-    });
+        // Respond with combined data
+        res.json({
+            title: book.title,
+            author: authors.join(', '),
+            genre: genres.join(', '),
+            cover_image_url: book.cover_image_url || 'default-image-url.jpg',
+            description: description
+        });
 
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Internal server error' });
-  }
+    } catch (err) {
+        console.error('Error fetching book data:', err.message);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+//route for the search page
+app.get('/searchPage', async (req, res) => {
+    console.log("Search button hit");
+    const searchQuery = req.query.q;
+    console.log('Search Query:', searchQuery);  // Debugging
+
+    if (!searchQuery || searchQuery.trim() === "") {
+        // If search query is empty, return an error message or ask for a valid query
+        return res.send('<h1>No search query provided!</h1><p>Please enter a search term.</p>');
+    }
+
+    try {
+        // Perform the query with the user's search term
+        const searchResult = await pool.query(`
+            SELECT DISTINCT b.*, s.name AS subject_name, p.name AS author_name
+            FROM books_book b
+            LEFT JOIN books_subject s ON b.gutenberg_id = s.id
+            LEFT JOIN books_book_authors ba ON b.gutenberg_id = ba.book_id
+            LEFT JOIN books_person p ON ba.person_id = p.id
+            WHERE LOWER(b.title) LIKE LOWER($1)
+               OR LOWER(p.name) LIKE LOWER($1)
+               OR LOWER(s.name) LIKE LOWER($1)`, 
+            [`%${searchQuery}%`]);
+
+        // If no results are found, send a custom message or render a no-results page
+        if (searchResult.rowCount === 0) {
+            return res.send('<h1>No Results Found</h1><p>We could not find any books matching your search term.</p>');
+        }
+
+        res.render('searchPage', {
+            books: searchResult.rows, // <-- MUST be an array
+            searchQuery
+        });
+
+    } catch (error) {
+        console.error('Error executing query:', error);
+        res.status(500).send('<h1>Error occurred</h1><p>There was an error while processing your request. Please try again later.</p>');
+    }
 });
