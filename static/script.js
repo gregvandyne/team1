@@ -1,130 +1,132 @@
-// static/script.js
 document.addEventListener('DOMContentLoaded', () => {
     console.log("Script Loaded Successfully!");
 
-    // Book Hover Effect
+    // Global variables
+    let currentUser = localStorage.getItem('currentUser');
+    let selectedBook = {};
+
+    // ------------------------------
+    // Book Click → Show Modal
+    // ------------------------------
     document.querySelectorAll('.book').forEach(book => {
         book.addEventListener('click', async function (e) {
             e.stopPropagation();
-            const bookId = this.dataset.bookId || "1"; //  to test ID
-            console.log('Book ID:', bookId); 
+            const bookId = this.dataset.bookId;
 
-            if (!bookId) {
-                console.error('Book ID is missing.');
-                return;
-            }
+            if (!bookId) return console.error('Missing book ID');
 
             const modal = document.getElementById('book-modal');
-            if (!modal) {
-                console.error('Modal element not found');
-                return;
-            }
-            
+            if (!modal) return console.error('Modal not found');
+
             modal.style.display = 'block';
 
             try {
-                // Corrected fetch URL with the bookId parameter
-                const response = await fetch(`/api/books/${bookId}`);
-                const bookData = await response.json();
+                const res = await fetch(`/api/books/${bookId}`);
+                const book = await res.json();
 
-                document.getElementById('book-image').src = bookData.cover_image_url;
-                document.getElementById('book-title').textContent = bookData.title;
-                document.getElementById('book-author').textContent = bookData.author;
-                document.getElementById('book-genre').textContent = bookData.genre;
-                document.getElementById('book-description').textContent = bookData.description;
-            } catch (error) {
-                console.error('Error fetching book data:', error);
+                openBookModal(
+                    book.title,
+                    book.author,
+                    book.genre,
+                    book.description,
+                    book.cover_image_url,
+                    book.id,
+                    book.download_count,
+                    book.download_url
+                );
+            } catch (err) {
+                console.error('Fetch failed:', err);
             }
         });
     });
 
-    // Horizontal Scrolling for Book Lists
+    // ------------------------------
+    // Scrollable Book Lists
+    // ------------------------------
     document.querySelectorAll('.book-list').forEach(list => {
         let isDown = false, startX, scrollLeft;
 
-        list.addEventListener('mousedown', (e) => {
+        list.addEventListener('mousedown', e => {
             isDown = true;
             startX = e.pageX - list.offsetLeft;
             scrollLeft = list.scrollLeft;
         });
 
-        ['mouseleave', 'mouseup'].forEach(event => list.addEventListener(event, () => isDown = false));
+        ['mouseleave', 'mouseup'].forEach(event =>
+            list.addEventListener(event, () => isDown = false)
+        );
 
-        list.addEventListener('mousemove', (e) => {
+        list.addEventListener('mousemove', e => {
             if (!isDown) return;
             e.preventDefault();
-            list.scrollLeft = scrollLeft - (e.pageX - list.offsetLeft - startX) * 2;
+            const x = e.pageX - list.offsetLeft;
+            const walk = (x - startX) * 2;
+            list.scrollLeft = scrollLeft - walk;
         });
     });
 
+    // ------------------------------
     // Library Box Selection
+    // ------------------------------
     document.querySelectorAll('.library-box').forEach(box => {
         box.addEventListener('click', function () {
             document.querySelectorAll('.library-box').forEach(b => b.classList.remove('active'));
             this.classList.add('active');
 
-            const newTitle = this.querySelector('h2').textContent;
+            const newTitle = this.querySelector('h2')?.textContent;
             const heroTitle = document.querySelector('.hero-content h1');
-
-            if (heroTitle) {
-                heroTitle.textContent = newTitle;
-            } else {
-                console.error('Could not find .hero-content h1');
-            }
+            if (heroTitle && newTitle) heroTitle.textContent = newTitle;
         });
     });
 
-    // Search Functionality
+    // ------------------------------
+    // Search
+    // ------------------------------
     const searchBtn = document.querySelector('.search-btn');
     const searchInput = document.getElementById('search-input');
-    
-    // Function to perform the search
+
     function performSearch() {
         const query = searchInput.value.trim();
-        if (query) {
-            window.location.href = `/searchPage?query=${encodeURIComponent(query)}`;
-        } else {
-            window.location.href = `/searchPage`;
-        }
+        window.location.href = query ? `/searchPage?query=${encodeURIComponent(query)}` : `/searchPage`;
     }
-    
-    // Handle search button click
+
     if (searchBtn && searchInput) {
-        searchBtn.addEventListener('click', (e) => {
+        searchBtn.addEventListener('click', e => {
             e.preventDefault();
             performSearch();
         });
-    
-        // Handle Enter key press inside the input
-        searchInput.addEventListener('keypress', (e) => {
+
+        searchInput.addEventListener('keypress', e => {
             if (e.key === 'Enter') {
                 e.preventDefault();
                 performSearch();
             }
         });
     }
-    
 
-    // Filter Sidebar Toggle
+    // ------------------------------
+    // Filter Sidebar
+    // ------------------------------
     const filterSidebar = document.getElementById('filter-sidebar');
     const filterToggle = document.getElementById('filter-toggle');
 
-    if (filterToggle && filterSidebar) {
+    if (filterSidebar && filterToggle) {
         filterToggle.addEventListener('click', () => {
             filterSidebar.classList.toggle('open');
-            filterToggle.innerHTML = filterSidebar.classList.contains('open') ? '❮' : '❯'; 
+            filterToggle.innerHTML = filterSidebar.classList.contains('open') ? '❮' : '❯';
         });
 
-        // Close sidebar when clicking outside
-        window.addEventListener('click', (event) => {
-            if (!filterSidebar.contains(event.target) && event.target !== filterToggle) {
+        window.addEventListener('click', e => {
+            if (!filterSidebar.contains(e.target) && e.target !== filterToggle) {
                 filterSidebar.classList.remove('open');
-                filterToggle.innerHTML = '❯'; 
+                filterToggle.innerHTML = '❯';
             }
         });
     }
 
-    // Apply Filters
+    // ------------------------------
+    // Apply Filters Button
+    // ------------------------------
     const applyFiltersBtn = document.getElementById('apply-filters');
     if (applyFiltersBtn) {
         applyFiltersBtn.addEventListener('click', () => {
@@ -135,258 +137,142 @@ document.addEventListener('DOMContentLoaded', () => {
                 year: document.getElementById('year-filter')?.value.trim() || '',
                 format: document.getElementById('format-filter')?.value || ''
             };
-        console.log(`Filters Applied:`, filters);
-        alert('Filters Applied! (Functionality can be added here)');
-    });
+            console.log("Filters Applied:", filters);
+            alert("Filters Applied! (Add logic here)");
+        });
+    }
 
-    // Close modal when clicking outside of it
-    window.addEventListener('click', (e) => {
-        const modal = document.getElementById('shelf-modal') || document.getElementById('book-modal');
-        if (modal && e.target === modal) {
-            closeBookModal();
-        }
-    });
-
-    // Attach modal functions to global scope for inline `onclick` attributes
-    window.openBookModal = openBookModal;
-    window.closeBookModal = closeBookModal;
-    });
-});
-
-// Function to navigate to different pages 
-function navigateTo(page) {
-    window.location.href = page;
-}
-
-// Global variable to store current user
-let currentUser = null;
-
-// Set current user after login
-function setCurrentUser(username) {
-    currentUser = username;
-    localStorage.setItem('currentUser', username);
-}
-
-// Get current user from localStorage on page load
-document.addEventListener('DOMContentLoaded', () => {
-    currentUser = localStorage.getItem('currentUser');
-    
-    // If we're on the myShelf page and a user is logged in, load their books
-    if (window.location.pathname.includes('myShelf') && currentUser) {
+    // ------------------------------
+    // Load User Shelf if on myShelf
+    // ------------------------------
+    if (window.location.pathname.includes("myShelf") && currentUser) {
         loadUserShelf(currentUser);
     }
-});
 
-// Function to load user's shelf
-async function loadUserShelf(username) {
-  try {
-    const resp = await fetch(`/api/my-shelf?username=${encodeURIComponent(username)}`);
-    const data = await resp.json();
-    const shelf = document.getElementById('shelf-books');
-    
-    if (!shelf) {
-      console.error('Shelf element not found');
-      return;
-    }
-    
-    shelf.innerHTML = ''; // clear placeholders
+    // ------------------------------
+    // Modal & Shelf Functions
+    // ------------------------------
+    async function loadUserShelf(username) {
+        try {
+            const res = await fetch(`/api/my-shelf?username=${encodeURIComponent(username)}`);
+            const data = await res.json();
+            const shelf = document.getElementById('shelf-books');
+            if (!shelf) return console.error('Shelf container not found');
 
-    if (!data.success || data.books.length === 0) {
-      shelf.innerHTML = '<p>Your shelf is empty. Add some books!</p>';
-      return;
-    }
+            shelf.innerHTML = '';
+            if (!data.success || data.books.length === 0) {
+                shelf.innerHTML = '<p>Your shelf is empty. Add some books!</p>';
+                return;
+            }
 
-    data.books.forEach(book => {
-      // 1) Book container
-      const card = document.createElement('div');
-      card.className = 'book';
-
-      // 2) Cover image
-      const img = document.createElement('img');
-      img.src = book.bookimageurl || '/static/placeholder_book.jpg';
-      img.alt = book.booktitle;
-      card.appendChild(img);
-
-      // 3) Info block under cover
-      const info = document.createElement('div');
-      info.className = 'book-info';
-      info.innerHTML = `
-        <h3>${book.booktitle}</h3>
-        <p>Author: ${book.bookauthor}</p>
-        <p>Genre: ${book.bookgenre || '—'}</p>
-        <p>Downloads: ${book.downloadcount}</p>
-      `;
-      card.appendChild(info);
-
-      // 4) Click → open modal, pass downloadCount
-      card.onclick = () => openBookModal(
-        book.booktitle,
-        book.bookauthor,
-        book.bookgenre,
-        book.bookdescription,
-        book.bookimageurl,
-        book.bookid,
-        book.downloadcount
-      );
-
-      shelf.appendChild(card);
-    });
-  } catch (e) {
-    console.error('loadUserShelf error', e);
-  }
-}
-
-let selectedBook = {};
-
-async function addToShelf() {
-    if (!currentUser || !selectedBook || !selectedBook.id) {
-        alert("Login required or book data missing.");
-        return;
-    }
-
-    const payload = {
-        username: currentUser,
-        book_id: selectedBook.id
-    };
-
-    try {
-        const response = await fetch('/api/add-to-shelf', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(payload)
-        });
-
-        const data = await response.json();
-        if (data.success) {
-            alert("Book added to your shelf!");
-        } else {
-            alert("Failed to add book: " + (data.message || "Unknown error"));
+            data.books.forEach(book => {
+                const card = document.createElement('div');
+                card.className = 'book';
+                card.innerHTML = `
+                    <img src="${book.bookimageurl || '/static/placeholder_book.jpg'}" alt="${book.booktitle}">
+                    <div class="book-info">
+                        <h3>${book.booktitle}</h3>
+                        <p>Author: ${book.bookauthor}</p>
+                        <p>Genre: ${book.bookgenre || '—'}</p>
+                        <p>Downloads: ${book.downloadcount}</p>
+                    </div>
+                `;
+                card.onclick = () => openBookModal(
+                    book.booktitle,
+                    book.bookauthor,
+                    book.bookgenre,
+                    book.bookdescription,
+                    book.bookimageurl,
+                    book.bookid,
+                    book.downloadcount
+                );
+                shelf.appendChild(card);
+            });
+        } catch (err) {
+            console.error('Error loading shelf:', err);
         }
-    } catch (err) {
-        console.error('addToShelf error:', err);
-        alert("Something went wrong while adding to shelf.");
     }
-}
 
-function openBookModal(title, author, genre, description, imageUrl, id = null, downloadCount = 0, downloadUrl = null) {
-    selectedBook = { title, author, genre, description, imageUrl, id, downloadCount, downloadUrl };
+    function openBookModal(title, author, genre, description, imageUrl, id = null, downloadCount = 0, downloadUrl = null) {
+        selectedBook = { title, author, genre, description, imageUrl, id, downloadCount, downloadUrl };
 
         document.getElementById('book-title').textContent = title;
         document.getElementById('book-author').textContent = author;
         document.getElementById('book-description').textContent = description || 'No description available.';
         document.getElementById('book-image').src = imageUrl;
 
-        document.getElementById('book-modal').style.display = 'block';
-
         const modal = document.getElementById('book-modal');
-        if (!modal) {
-            console.error("Modal element not found!");
-            return;
-        }
+        if (modal) modal.style.display = 'flex';
 
-
-        // ✅ Download button logic
         const downloadBtn = modal.querySelector('#download-btn');
         if (downloadBtn) {
             downloadBtn.onclick = () => {
-                if (downloadUrl) {
-                    window.open(downloadUrl, '_blank');
-                } else {
-                    alert("Download not available for this book.");
-                }
+                if (downloadUrl) window.open(downloadUrl, '_blank');
+                else alert("Download not available.");
             };
         }
 
-        const addToShelfBtn = document.getElementById('add-to-shelf-btn');
-        if (addToShelfBtn && id) {
-            addToShelfBtn.onclick = () => addBookToShelf(id);
+        const addBtn = document.getElementById('add-to-shelf-btn');
+        const removeBtn = document.getElementById('remove-from-shelf');
+
+        if (addBtn) addBtn.onclick = () => addBookToShelf(id);
+        if (removeBtn) removeBtn.onclick = () => removeBookFromShelf(id);
+    }
+
+    function closeBookModal() {
+        const modal = document.getElementById('book-modal') || document.getElementById('shelf-modal');
+        if (modal) modal.style.display = 'none';
+    }
+
+    async function addBookToShelf(bookId) {
+        if (!currentUser) return alert('Please log in to add books.');
+
+        try {
+            const res = await fetch('/api/add-to-shelf', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: currentUser, bookId })
+            });
+
+            const data = await res.json();
+            if (data.success) {
+                alert('Book added!');
+                closeBookModal();
+            } else {
+                alert(data.message || 'Failed to add book');
+            }
+        } catch (err) {
+            console.error('Add error:', err);
+            alert('Error adding book');
         }
+    }
 
-        const removeFromShelfBtn = document.getElementById('remove-from-shelf');
-        if (removeFromShelfBtn && id) {
-            removeFromShelfBtn.onclick = () => removeBookFromShelf(id);
+    async function removeBookFromShelf(bookId) {
+        if (!currentUser) return alert('Please log in to manage your shelf.');
+
+        try {
+            const res = await fetch('/api/remove-from-shelf', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: currentUser, bookId })
+            });
+
+            const data = await res.json();
+            if (data.success) {
+                alert('Book removed');
+                closeBookModal();
+                loadUserShelf(currentUser);
+            } else {
+                alert(data.message || 'Failed to remove');
+            }
+        } catch (err) {
+            console.error('Remove error:', err);
+            alert('Error removing book');
         }
-
-        modal.style.display = 'flex';
     }
 
-// Function to close the book modal
-function closeBookModal() {
-    const modal = document.getElementById('shelf-modal') || document.getElementById('book-modal');
-    if (modal) {
-        modal.style.display = 'none';
-    }
-}
-
-// Function to add a book to the user's shelf
-async function addBookToShelf(bookId) {
-    if (!currentUser) {
-        alert('Please log in to add books to your shelf');
-        return;
-    }
-    
-    try {
-        const response = await fetch('/api/add-to-shelf', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ username: currentUser, bookId })
-        });
-        
-        const data = await response.json();
-        
-        if (data.success) {
-            alert('Book added to your shelf!');
-            closeBookModal();
-        } else {
-            alert(data.message || 'Failed to add book to shelf');
-        }
-    } catch (error) {
-        console.error('Error adding book to shelf:', error);
-        alert('An error occurred while adding the book to your shelf');
-    }
-}
-
-// Function to remove a book from the user's shelf
-async function removeBookFromShelf(bookId) {
-    if (!currentUser) {
-        alert('Please log in to manage your shelf');
-        return;
-    }
-    
-    try {
-        const response = await fetch('/api/remove-from-shelf', {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ username: currentUser, bookId })
-        });
-        
-        const data = await response.json();
-        
-        if (data.success) {
-            alert('Book removed from your shelf');
-            closeBookModal();
-            // Reload the shelf to reflect the change
-            loadUserShelf(currentUser);
-        } else {
-            alert(data.message || 'Failed to remove book from shelf');
-        }
-    } catch (error) {
-        console.error('Error removing book from shelf:', error);
-        alert('An error occurred while removing the book from your shelf');
-    }
-}
-
-
-document.addEventListener("DOMContentLoaded", () => {
-  const user = localStorage.getItem("currentUser");
-  if (user && window.location.pathname.includes("myShelf")) {
-    loadUserShelf(user);
-  }
+    // Global exposure
+    window.openBookModal = openBookModal;
+    window.closeBookModal = closeBookModal;
 });
 

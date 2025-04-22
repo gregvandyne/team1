@@ -235,19 +235,12 @@ def featured():
 def collection():
     return render_template('collection.html')
 
-<<<<<<< HEAD
+
 @app.route('/createAccount', methods=['GET', 'POST'])
 def createAccount():
     if request.method == 'GET':
         return render_template('createAccount.html')
-=======
-@app.route('/createAccount', methods=['GET'])
-def createAccountPage():
-    return render_template('createAccount.html')
->>>>>>> origin/main
 
-@app.route('/create-account', methods=['POST'])
-def createAccount():
     try:
         if request.is_json:
             data = request.get_json()
@@ -274,13 +267,13 @@ def createAccount():
         hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
         print("🔐 Hashed password:", hashed_password)
 
-            cursor.execute(
-                'INSERT INTO "PRIVATE"."USERS" ("userUsername", "userEmail", "hashPassword") VALUES (%s, %s, %s)',
-                (username, email, hashed_password)
-            )
-            conn.commit()
-            print("✅ Account created successfully")
-            return jsonify({"success": True, "message": "Account created successfully"})
+        cursor.execute(
+            'INSERT INTO "PRIVATE"."USERS" ("userUsername", "userEmail", "hashPassword") VALUES (%s, %s, %s)',
+            (username, email, hashed_password)
+        )
+        conn.commit()
+        print("✅ Account created successfully")
+        return jsonify({"success": True, "message": "Account created successfully"})
 
     except Exception as e:
         print("❌ Error creating account:", e)
@@ -293,7 +286,7 @@ def login():
         return render_template('loginPage.html')
 
     if request.method == 'POST':
-<<<<<<< HEAD
+
         print("Login request received")
 
         try:
