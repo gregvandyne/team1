@@ -232,11 +232,10 @@ def createAccount():
     if request.method == 'GET':
         return render_template('createAccount.html')
 
-    if request.method == 'POST':
-        if request.is_json:
-            data = request.get_json()
-        else:
-            data = request.form
+    try:
+        data = request.get_json(force=True)
+    except:
+        data = request.form
 
         username = data['username']
         email = data['email']
