@@ -229,18 +229,18 @@ def collection():
 
 @app.route('/createAccount', methods=['GET', 'POST'])
 def createAccount():
-    if request.method == 'GET':
-        return render_template('createAccount.html')
-
     try:
         if request.is_json:
             data = request.get_json()
         else:
             data = request.form
 
-        username = data['username']
-        email = data['email']
-        password = data['password']
+        username = data.get('username')
+        email = data.get('email')
+        password = data.get('password')
+
+        if not username or not email or not password:
+            return jsonify({"success": False, "message": "Missing fields."}), 400
 
         print("📥 Creating account with:")
         print(f"Username: {username}, Email: {email}")
@@ -261,11 +261,11 @@ def createAccount():
         )
         conn.commit()
         print("✅ Account created successfully")
-        return jsonify({"success": True, "message": "Account created successfully!"})
+        return redirect(url_for('login'))
 
     except Exception as e:
         print("❌ Error creating account:", e)
-        return jsonify({"success": False, "message": "Failed to create account."})
+        return render_template("createAccount.html", error="Failed to create account.")
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -275,12 +275,12 @@ def login():
     if request.method == 'POST':
         if request.is_json:
             data = request.get_json()
-            username = data['username']
-            password = data['password']
+            username = data.get('username')
+            password = data.get('password')
         else:
             data = request.form
-            username = data['uname']
-            password = data['psw']
+            username = data.get('uname')
+            password = data.get('psw')
 
         try:
             cursor.execute('SELECT * FROM "PRIVATE"."USERS" WHERE "userUsername" = %s', (username,))
