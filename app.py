@@ -235,34 +235,44 @@ def featured():
 def collection():
     return render_template('collection.html')
 
+<<<<<<< HEAD
 @app.route('/createAccount', methods=['GET', 'POST'])
 def createAccount():
     if request.method == 'GET':
         return render_template('createAccount.html')
+=======
+@app.route('/createAccount', methods=['GET'])
+def createAccountPage():
+    return render_template('createAccount.html')
+>>>>>>> origin/main
 
-    if request.method == 'POST':
+@app.route('/create-account', methods=['POST'])
+def createAccount():
+    try:
         if request.is_json:
             data = request.get_json()
         else:
             data = request.form
 
-        username = data['username']
-        email = data['email']
-        password = data['password']
+        username = data.get('username')
+        email = data.get('email')
+        password = data.get('password')
+
+        if not username or not email or not password:
+            return jsonify({"success": False, "message": "Missing fields."}), 400
 
         print("📥 Creating account with:")
         print(f"Username: {username}, Email: {email}")
 
-        try:
-            cursor.execute('SELECT * FROM "PRIVATE"."USERS" WHERE "userUsername" = %s OR "userEmail" = %s', (username, email))
-            existing_user = cursor.fetchone()
-            print("👀 Existing user check:", existing_user)
+        cursor.execute('SELECT * FROM "PRIVATE"."USERS" WHERE "userUsername" = %s OR "userEmail" = %s', (username, email))
+        existing_user = cursor.fetchone()
+        print("👀 Existing user check:", existing_user)
 
-            if existing_user:
-                return render_template('createAccount.html', error="Username or email already exists.")
+        if existing_user:
+            return jsonify({"success": False, "message": "Username or email already exists."})
 
-            hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
-            print("🔐 Hashed password:", hashed_password)
+        hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
+        print("🔐 Hashed password:", hashed_password)
 
             cursor.execute(
                 'INSERT INTO "PRIVATE"."USERS" ("userUsername", "userEmail", "hashPassword") VALUES (%s, %s, %s)',
@@ -272,9 +282,9 @@ def createAccount():
             print("✅ Account created successfully")
             return jsonify({"success": True, "message": "Account created successfully"})
 
-        except Exception as e:
-            print("❌ Error creating account:", e)
-            return render_template('createAccount.html', error="Failed to create account.")
+    except Exception as e:
+        print("❌ Error creating account:", e)
+        return render_template("createAccount.html", error="Failed to create account.")
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -283,7 +293,9 @@ def login():
         return render_template('loginPage.html')
 
     if request.method == 'POST':
+<<<<<<< HEAD
         print("Login request received")
+
         try:
             if request.is_json:
                 data = request.get_json()
