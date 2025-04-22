@@ -227,7 +227,11 @@ def featured():
 def collection():
     return render_template('collection.html')
 
-@app.route('/createAccount', methods=['GET', 'POST'])
+@app.route('/createAccount', methods=['GET'])
+def createAccountPage():
+    return render_template('createAccount.html')
+
+@app.route('/create-account', methods=['POST'])
 def createAccount():
     try:
         if request.is_json:
