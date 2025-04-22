@@ -68,13 +68,13 @@
             <h2>New to Our Shelves</h2>
             <div class="book-list">
                 {% for book in books_new %}
-                    <div class="book" onclick="openBookModal('{{ book.title }}', '{{ book.author }}', '', '', '{{ book.cover_image_url }}', '{{ book.id }}', 0, '{{ book.download_url }}')">
-                        <img src="{{ book.cover_image_url or '../static/placeholder_book.jpg' }}" alt="{{ book.title }}">
-                        <p class="book-title">{{ book.title }}</p>
-                        {% if book.author != 'Unknown' %}
-                            <p class="book-author">{{ book.author }}</p>
-                        {% endif %}
-                    </div>
+                <div class="book" onclick="openBookModal('{{ book.title }}', '{{ book.author }}', '', '', '{{ book.cover_image_url }}', '{{ book.id }}', 0, '{{ book.download_url }}')">
+                    <img src="{{ book.cover_image_url or '../static/placeholder_book.jpg' }}" alt="{{ book.title }}">
+                    <p class="book-title">{{ book.title }}</p>
+                    {% if book.author != 'Unknown' %}
+                    <p class="book-author">{{ book.author }}</p>
+                    {% endif %}
+                </div>
                 {% endfor %}
             </div>
             <div class="grey-divider"></div>
@@ -85,42 +85,45 @@
             <h2>Science Fiction</h2>
             <div class="book-list">
                 {% for book in books_sci_fi %}
-                    <div class="book" onclick="openBookModal('{{ book.title }}', '{{ book.author }}', 'Science Fiction', '', '{{ book.cover_image_url }}', '{{ book.id }}', 0, '{{ book.download_url }}')">
-                        <img src="{{ book.cover_image_url if book.cover_image_url else url_for('static', filename='placeholder_book.jpg') }}" alt="{{ book.title }}">
-                        <p class="book-title">{{ book.title }}</p>
-                        {% if book.author != 'Unknown' %}
-                            <p class="book-author">{{ book.author }}</p>
-                        {% endif %}
-                    </div>
+                <div class="book" data-gutenberg-id="{{ book.id }}">
+                    <img src="{{ book.cover_image_url if book.cover_image_url else url_for('static', filename='placeholder_book.jpg') }}" alt="{{ book.title }}">
+                    <p class="book-title">{{ book.title }}</p>
+                    {% if book.author != 'Unknown' %}
+                    <p class="book-author">{{ book.author }}</p>
+                    {% endif %}
+                </div>
                 {% endfor %}
             </div>
             <div class="grey-divider"></div>
         </section>
-    
-        
+
         <!-- Mystery & Thriller -->
         <section class="book-row">
             <h2>Mystery & Thriller</h2>
             <div class="book-list">
                 {% for book in books_mystery %}
-                    <div class="book" onclick="openBookModal('{{ book.title }}', '{{ book.author }}', 'Mystery & Thriller', '', '{{ book.cover_image_url }}', '{{ book.id }}', 0, '{{ book.download_url }}')">
-                        <img src="{{ book.cover_image_url or '../static/placeholder_book.jpg' }}" alt="{{ book.title }}">
-                        <p>{{ book.title }}</p>
-                    </div>
+                <div class="book" data-gutenberg-id="{{ book.id }}">
+                    <img src="{{ book.cover_image_url or '../static/placeholder_book.jpg' }}" alt="{{ book.title }}">
+                    <p class="book-title">{{ book.title }}</p>
+                    {% if book.author != 'Unknown' %}
+                    <p class="book-author">{{ book.author }}</p>
+                    {% endif %}
+                </div>
                 {% endfor %}
             </div>
             <div class="grey-divider"></div>
         </section>
+
 
         <!-- Biographies & Memoirs -->
         <section class="book-row">
             <h2>Biographies & Memoirs</h2>
             <div class="book-list">
                 {% for book in books_biography %}
-                    <div class="book" onclick="openBookModal('{{ book.title }}', '{{ book.author }}', 'Biographies & Memoirs', '', '{{ book.cover_image_url }}', '{{ book.id }}', 0, '{{ book.download_url }}')">
-                        <img src="{{ book.cover_image_url or '../static/placeholder_book.jpg' }}" alt="{{ book.title }}">
-                        <p>{{ book.title }}</p>
-                    </div>
+                <div class="book" onclick="openBookModal('{{ book.title }}', '{{ book.author }}', 'Biographies & Memoirs', '', '{{ book.cover_image_url }}', '{{ book.id }}', 0, '{{ book.download_url }}')">
+                    <img src="{{ book.cover_image_url or '../static/placeholder_book.jpg' }}" alt="{{ book.title }}">
+                    <p>{{ book.title }}</p>
+                </div>
                 {% endfor %}
             </div>
             <div class="grey-divider"></div>
@@ -131,10 +134,10 @@
             <h2>Poetry</h2>
             <div class="book-list">
                 {% for book in books_poetry %}
-                    <div class="book" onclick="openBookModal('{{ book.title }}', '{{ book.author }}', 'Poetry', '', '{{ book.cover_image_url }}', '{{ book.id }}', 0, '{{ book.download_url }}')">
+                <div class="book" onclick="openBookModal('{{ book.title }}', '{{ book.author }}', 'Poetry', '', '{{ book.cover_image_url }}', '{{ book.id }}', 0, '{{ book.download_url }}')">
                     <img src="{{ book.cover_image_url or '../static/placeholder_book.jpg' }}" alt="{{ book.title }}">
-                        <p>{{ book.title }}</p>
-                    </div>
+                    <p>{{ book.title }}</p>
+                </div>
                 {% endfor %}
             </div>
             <div class="grey-divider"></div>
@@ -164,5 +167,18 @@
     </main>
 
     <script src="../static/script.js"></script>
+    <script>
+    // Safely handle the username and assign a default empty string if it's not available
+        const username = "{{ username | tojson | default('null') }}";
+
+    // Check if the username is present and log a warning if not
+    if (!username) {
+        console.warn("No user detected — certain features may be disabled.");
+    }
+
+    // Any other JavaScript logic goes here
+    console.log(`Username: ${username}`);
+    </script>
+
 </body>
 </html>

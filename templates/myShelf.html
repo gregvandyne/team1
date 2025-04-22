@@ -21,40 +21,89 @@
         <h1 class="shelf-title">MY SHELF</h1>
         <hr class="divider">
         <div id="shelf-books" class="shelf-grid">
-            <!-- Example books for layout testing -->
-            <div class="book" onclick="openBookModal('Crime and Punishment', 'Fyodor Dostoevsky', 'Classic', 'A gripping tale of morality and redemption.', '../static/crime_and_punishment.jpg')">
-                <img src="../static/crime_and_punishment.jpg" alt="Crime and Punishment">
+            {% if books %}
+            {% for book in books %}
+            <div class="book" data-gutenberg-id="{{ book.gutenberg_id }}">
+                <img src="{{ book.cover_image_url or '../static/placeholder_book.jpg' }}" alt="{{ book.title }}">
+                <div class="book-details">
+                    <h3 class="book-title">{{ book.title }}</h3>
+                    <p class="book-author">{{ book.author }}</p>
+                    {% if book.genre %}
+                    <p class="genre">{{ book.genre }}</p>
+                    {% endif %}
+                </div>
             </div>
-            <div class="book" onclick="openBookModal('Dracula', 'Bram Stoker', 'Horror', 'A classic Gothic horror novel.', '../static/dracula.jpg')">
-                <img src="../static/dracula.jpg" alt="Dracula">
-            </div>
-            <!-- Add more books below this -->
+            {% endfor %}
+            {% else %}
+            <p>Your shelf is empty. Add some books!</p>
+            {% endif %}
         </div>
     </main>
-
-    <!-- Modal for Book Details -->
-    <div id="shelf-modal" class="modal">
+    <!-- Use the same modal structure as in the main script -->
+    <div id="book-modal" class="modal">
         <div class="modal-content">
             <span class="close" onclick="closeBookModal()">&times;</span>
             <div class="modal-body">
-                <img id="shelf-book-image" src="" alt="Book Cover" class="modal-book-img">
+                <img id="book-image" src="" alt="Book Cover" class="modal-book-img">
                 <div class="modal-details">
-                    <h2 id="shelf-book-title"></h2>
-                    <p><strong>Author:</strong> <span id="shelf-book-author"></span></p>
-                    <p><strong>Genre:</strong> <span id="shelf-book-genre"></span></p>
-                    <p><strong>Downloads:</strong> <span id="shelf-book-downloads"></span></p>
-                    <p id="shelf-book-description"></p>
-                    <p id="shelf-book-description"></p>
+                    <h2 id="book-title"></h2>
+                    <p><strong>Author:</strong> <span id="book-author"></span></p>
+                    <p><strong>Genre:</strong> <span id="book-genre"></span></p>
+                    <p id="book-description"></p>
                     <div class="modal-buttons">
-                        <button id="remove-from-shelf">Remove from Shelf</button>
-                        <button id="read-now">Read Now</button>
-                        <button id="close-modal" onclick="closeBookModal()">Close</button>
+                        <button id="download-btn">Download</button>
+                        <button id="add-to-shelf-btn">Add to Shelf</button>
+                        <button onclick="closeBookModal()">Close</button>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-
     <script src="../static/script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Store username in sessionStorage for script.js to use
+            const username = "{{ username | tojson | default('null') }}";
+
+            if (username) {
+                sessionStorage.setItem('username', username);
+            }
+
+            // Add click events to all books in shelf
+            document.querySelectorAll('.book').forEach(book => {
+                book.addEventListener('click', function(e) {
+                    e.stopPropagation();
+
+                    const bookId = this.dataset.gutenbergId;
+                    const title = this.querySelector('.book-title')?.textContent || "";
+                    const author = this.querySelector('.book-author')?.textContent || "Unknown";
+                    const genre = this.querySelector('.genre')?.textContent || "";
+                    const img = this.querySelector('img');
+                    const imageUrl = img ? img.src : "../static/placeholder_book.jpg";
+
+                    // Use the API to get book details
+                    fetch(`/api/books/${bookId}`)
+                        .then(response => response.json())
+                        .then(book => {
+                            openBookModal(
+                                book.title,
+                                book.author,
+                                book.genre || "",
+                                book.description || "No description available.",
+                                book.cover_image_url || imageUrl,
+                                book.gutenberg_id,
+                                book.download_count || 0,
+                                book.download_url || ""
+                            );
+                        })
+                        .catch(error => {
+                            console.error('Error fetching book details:', error);
+                            // Fallback to what we have
+                            openBookModal(title, author, genre, "", imageUrl, bookId);
+                        });
+                });
+            });
+        });
+    </script>
 </body>
 </html>

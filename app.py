@@ -68,9 +68,7 @@ try:
             '%dark fantasy%', '%magical realism%', '%mythic fiction%', '%urban fantasy%',
             '%grimdark%', '%epic fantasy%', '%high fantasy%', '%low fantasy%',
             '%sword and sorcery%', '%dark fantasy%', '%magical realism%', '%mythic fiction%',
-            '%urban fantasy%', '%grimdark%', '%epic fantasy%', '%high fantasy%',
-            '%low fantasy%', '%sword and sorcery%', '%dark fantasy%', '%magical realism%',
-            '%mythic fiction%', '%urban fantasy%', '%grimdark%', '%epic fantasy%'
+            '%urban fantasy%', '%grimdark%', '%epic fantasy%', '%high fantasy%'
         ])
     ''')
     conn.commit()
@@ -136,6 +134,8 @@ def index():
 
 @app.route('/home')
 def home():
+    username = session.get('username', '')  # Or whatever logic you use for getting the username
+
     cursor = conn.cursor() 
     try:
         genres = {
@@ -174,7 +174,8 @@ def home():
 
         results['books_new'] = random.sample(all_genre_books, min(10, len(all_genre_books)))
 
-        return render_template('home.html', **results)
+        return render_template('home.html', **results, username=session.get('username'))
+
     except Exception as e:
         print("Database error:", e)
         return render_template('home.html', books_sci_fi=[], books_mystery=[], books_biography=[], books_poetry=[], books_new=[])
@@ -217,19 +218,75 @@ def searchPage():
         return render_template('searchPage.html', books=[], query=query)
 
 # Other routes remain unchanged
+#myShelf route with session to display username books
 @app.route('/myShelf')
 def myShelf():
     if not session.get('logged_in'):
         return redirect(url_for('login'))
     
     username = session.get('username')
-    print("Username:",username)
+    print(f"Fetching shelf for username: {username}")
 
-    return render_template('myShelf.html', username=username)
+    try:
+        # Get the userId for the logged-in user from PRIVATE schema
+        cursor.execute('SELECT "userId" FROM "PRIVATE"."USERS" WHERE "userUsername" = %s;', (username,))
+        user_row = cursor.fetchone()
+        
+        if user_row is None:
+            print(f"User not found: {username}")
+            return render_template('myShelf.html', books=[], username=username, error="User not found")
+        
+        userId = user_row[0]
+        print(f"Found userId: {userId}")
+
+        # Get the books for this user (using gutenberg_id as the primary key)
+        cursor.execute("""
+            SELECT b.title,
+                  STRING_AGG(DISTINCT bp.name, ', ') FILTER (WHERE bp.name IS NOT NULL) AS author,
+                  b.genre, 
+                  bs.text AS description,
+                  b.cover_image_url, 
+                  b.gutenberg_id,
+                  b.download_count
+            FROM "PRIVATE"."USER_BOOKS" ub
+            LEFT JOIN "public"."books_book" b 
+                ON ub."bookId" = b."gutenberg_id"
+            LEFT JOIN "public"."books_book_authors" ba 
+                ON b."gutenberg_id" = ba."book_id"
+            LEFT JOIN "public"."books_person" bp 
+                ON ba."person_id" = bp."id"
+            LEFT JOIN "public"."books_summary" bs 
+                ON b."gutenberg_id" = bs."book_id"
+            WHERE ub."userId" = %s
+            GROUP BY b.title, b.genre, bs.text, b.cover_image_url, b.gutenberg_id, b.download_count;
+        """, (userId,))
+
+        rows = cursor.fetchall()
+        print(f"Found {len(rows)} books for user")
+
+        # Convert to list of dicts
+        books = []
+        for row in rows:
+            books.append({
+                'title': row[0],
+                'author': row[1] if row[1] else "Unknown",
+                'genre': row[2],
+                'description': row[3],
+                'cover_image_url': row[4] or '../static/placeholder_book.jpg',
+                'gutenberg_id': row[5],
+                'download_count': row[6] if row[6] else 0
+            })
+
+        return render_template('myShelf.html', books=books, username=username)
+    except Exception as e:
+        print(f"Error in myShelf route: {e}")
+        return render_template('myShelf.html', books=[], username=username, error="Error loading books")
+
 
 @app.route('/featured')
 def featured():
     return render_template('featured.html')
+
 
 @app.route('/collection')
 def collection():
@@ -339,8 +396,144 @@ def logout():
     # Clear the session
     session.clear()
     return redirect(url_for('home'))
-        
 
+# Add this route provide API access to book shelf
+@app.route('/addToShelf', methods=['POST'])
+def add_to_shelf():
+    if not session.get('logged_in'):
+        return jsonify({"message": "Please log in first"}), 401
+    
+    # Get data from the frontend request
+    data = request.get_json()
+    username = session.get('username')
+    book_id = data.get('book_id')
+    
+    if not book_id:
+        return jsonify({"message": "No book ID provided"}), 400
+
+    try:
+        # Connect to your PostgreSQL database
+        cursor = conn.cursor()
+
+        # First, get the gutenberg_id from the books_book table
+        cursor.execute('SELECT "gutenberg_id" FROM "public"."books_book" WHERE "id" = %s', (book_id,))
+        book_row = cursor.fetchone()
+        
+        if book_row is None:
+            return jsonify({"message": "Book not found"}), 404
+        
+        gutenberg_id = book_row[0]
+        
+        # Check if book already exists in user's shelf
+        cursor.execute('''
+            SELECT 1 FROM "PRIVATE"."USER_BOOKS" ub
+            JOIN "PRIVATE"."USERS" u ON ub."userId" = u."userId"
+            WHERE u."userUsername" = %s AND ub."bookId" = %s
+        ''', (username, gutenberg_id))
+        
+        if cursor.fetchone():
+            return jsonify({"message": "Book already in your shelf"}), 200
+
+        # Get the userId for the logged-in user
+        cursor.execute('SELECT "userId" FROM "PRIVATE"."USERS" WHERE "userUsername" = %s;', (username,))
+        user_row = cursor.fetchone()
+        
+        if user_row is None:
+            return jsonify({"message": "User not found"}), 404
+        
+        userId = user_row[0]
+
+        # Insert the book into the user's bookshelf using gutenberg_id
+        cursor.execute("""
+            INSERT INTO "PRIVATE"."USER_BOOKS" ("userId", "bookId", "dateAdded")
+            VALUES (%s, %s, NOW());
+        """, (userId, gutenberg_id))
+
+        conn.commit()
+        return jsonify({"message": "Book added to shelf!"}), 200
+        
+    except psycopg2.Error as e:
+        conn.rollback()
+        print("Database error:", e)
+        return jsonify({"message": "Database error occurred"}), 500
+    except Exception as e:
+        print("Error:", e)
+        return jsonify({"message": "An error occurred"}), 500
+
+@app.route('/api/books/<int:book_id>', methods=['GET'])
+def get_book_details(book_id):
+    try:
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT b.id, b.title, b.cover_image_url, b.gutenberg_id, b.genre,
+                   STRING_AGG(DISTINCT p.name, ', ') FILTER (WHERE p.name IS NOT NULL) AS author,
+                   bs.text as description, b.download_count
+            FROM books_book b
+            LEFT JOIN books_book_authors ba ON b.gutenberg_id = ba.book_id
+            LEFT JOIN books_person p ON ba.person_id = p.id
+            LEFT JOIN books_summary bs ON b.gutenberg_id = bs.book_id
+            WHERE b.gutenberg_id = %s
+            GROUP BY b.id, b.title, b.cover_image_url, b.gutenberg_id, b.genre, bs.text
+        ''', (book_id,))
+        
+        book = cursor.fetchone()
+        
+        if not book:
+            return jsonify({"error": "Book not found"}), 404
+            
+        book_data = {
+            "id": book[0],
+            "title": book[1],
+            "cover_image_url": book[2],
+            "gutenberg_id": book[3],
+            "genre": book[4],
+            "author": book[5] if book[5] else "Unknown",
+            "description": book[6] if book[6] else "No description available.",
+            "download_count": book[7] if book[7] else 0,
+            "download_url": f"https://www.gutenberg.org/files/{book[3]}/{book[3]}-0.txt"
+        }
+        
+        return jsonify(book_data)
+        
+    except Exception as e:
+        print("Error fetching book details:", e)
+        return jsonify({"error": "Failed to fetch book details"}), 500
+
+
+
+# Add an API endpoint to remove books from shelf
+@app.route('/api/remove-from-shelf', methods=['DELETE'])
+def remove_from_shelf():
+    if not session.get('logged_in'):
+        return jsonify({"success": False, "message": "Not logged in"}), 401
+    
+    data = request.get_json()
+    book_id = data.get('bookId')
+    username = session.get('username')
+    
+    try:
+        # Get the userId
+        cursor.execute('SELECT "userId" FROM "PRIVATE"."USERS" WHERE "userUsername" = %s;', (username,))
+        user_row = cursor.fetchone()
+        
+        if user_row is None:
+            return jsonify({"success": False, "message": "User not found"}), 404
+        
+        userId = user_row[0]
+        
+        # Delete the book from user's shelf
+        cursor.execute("""
+            DELETE FROM "PRIVATE"."USER_BOOKS" 
+            WHERE "userId" = %s AND "bookId" = %s;
+        """, (userId, book_id))
+        
+        conn.commit()
+        return jsonify({"success": True, "message": "Book removed from shelf"})
+        
+    except Exception as e:
+        conn.rollback()
+        print("Delete error:", e)
+        return jsonify({"success": False, "message": "An error occurred"}), 500
 
 if __name__ == '__main__':
     print("🚀 Flask server is starting...")

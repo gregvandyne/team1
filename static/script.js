@@ -2,40 +2,39 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log("Script Loaded Successfully!");
 
     // Global variables
-    let currentUser = localStorage.getItem('currentUser');
+    let currentUser = localStorage.getItem('currentUser') || sessionStorage.getItem('username');
     let selectedBook = {};
 
     // ------------------------------
     // Book Click → Show Modal
     // ------------------------------
+    // ------------------------------
+    // Book Click → Show Modal
+    // ------------------------------
     document.querySelectorAll('.book').forEach(book => {
-        book.addEventListener('click', async function (e) {
+        book.addEventListener('click', function (e) {
             e.stopPropagation();
-            const bookId = this.dataset.bookId;
 
-            if (!bookId) return console.error('Missing book ID');
+            // Get all the data from the book element
+            const bookId = this.dataset.gutenbergId;
+            const title = this.querySelector('.book-title')?.textContent || "";
+            const author = this.querySelector('.book-author')?.textContent || "Unknown";
+            const img = this.querySelector('img');
+            const imageUrl = img ? img.src : "../static/placeholder_book.jpg";
 
-            const modal = document.getElementById('book-modal');
-            if (!modal) return console.error('Modal not found');
-
-            modal.style.display = 'block';
-
-            try {
-                const res = await fetch(`/api/books/${bookId}`);
-                const book = await res.json();
-
+            if (bookId) {
                 openBookModal(
-                    book.title,
-                    book.author,
-                    book.genre,
-                    book.description,
-                    book.cover_image_url,
-                    book.id,
-                    book.download_count,
-                    book.download_url
+                    title,
+                    author,
+                    "", // genre
+                    "", // description
+                    imageUrl,
+                    bookId,
+                    0,  // download count
+                    bookId ? `https://www.gutenberg.org/files/${bookId}/${bookId}-0.txt` : ""
                 );
-            } catch (err) {
-                console.error('Fetch failed:', err);
+            } else {
+                console.error('Book ID not found on element');
             }
         });
     });
@@ -145,8 +144,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // ------------------------------
     // Load User Shelf if on myShelf
     // ------------------------------
-    if (window.location.pathname.includes("myShelf") && currentUser) {
-        loadUserShelf(currentUser);
+    if (window.location.pathname.includes("myShelf")) {
+        // Use the session username, not localStorage
+        const username = sessionStorage.getItem('username');
+        if (username) {
+            loadUserShelf(username);
+        }
     }
 
     // ------------------------------
@@ -193,31 +196,94 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function openBookModal(title, author, genre, description, imageUrl, id = null, downloadCount = 0, downloadUrl = null) {
-        selectedBook = { title, author, genre, description, imageUrl, id, downloadCount, downloadUrl };
+    // Add this function to your script.js or update the existing one
+    function loadUserShelf(username) {
+        if (!username) {
+            console.error('No username provided to loadUserShelf');
+            return;
+        }
 
-        document.getElementById('book-title').textContent = title;
-        document.getElementById('book-author').textContent = author;
-        document.getElementById('book-description').textContent = description || 'No description available.';
-        document.getElementById('book-image').src = imageUrl;
+        // Option 1: Use the API endpoint
+        fetch(`/api/my-shelf?username=${encodeURIComponent(username)}`)
+            .then(response => response.json())
+            .then(data => {
+                const shelf = document.getElementById('shelf-books');
+                if (!shelf) return console.error('Shelf container not found');
 
-        const modal = document.getElementById('book-modal');
-        if (modal) modal.style.display = 'flex';
+                shelf.innerHTML = '';  // Clear existing books
 
-        const downloadBtn = modal.querySelector('#download-btn');
+                if (!data.success || data.books.length === 0) {
+                    shelf.innerHTML = '<p>Your shelf is empty. Add some books!</p>';
+                    return;
+                }
+
+                data.books.forEach(book => {
+                    const card = document.createElement('div');
+                    card.className = 'book';
+                    card.dataset.gutenbergId = book.bookid;
+                    card.innerHTML = `
+                    <img src="${book.bookimageurl || '/static/placeholder_book.jpg'}" alt="${book.booktitle}">
+                    <div class="book-details">
+                        <h3 class="book-title">${book.booktitle}</h3>
+                        <p class="book-author">${book.bookauthor}</p>
+                        <p class="genre">${book.bookgenre || '—'}</p>
+                    </div>
+                `;
+
+                    card.addEventListener('click', function () {
+                        openBookModal(
+                            book.booktitle,
+                            book.bookauthor,
+                            book.bookgenre || "",
+                            book.bookdescription || "No description available.",
+                            book.bookimageurl || "/static/placeholder_book.jpg",
+                            book.bookid,
+                            book.downloadcount || 0,
+                            book.bookid ? `https://www.gutenberg.org/files/${book.bookid}/${book.bookid}-0.txt` : ""
+                        );
+                    });
+
+                    shelf.appendChild(card);
+                });
+            })
+            .catch(err => {
+                console.error('Error loading shelf:', err);
+                document.getElementById('shelf-books').innerHTML =
+                    '<p>Error loading your books. Please try again later.</p>';
+            });
+    }
+
+    // Update the openBookModal function to work for both regular books and shelf books
+    function openBookModal(title, author, genre, description, imageUrl, bookId, downloadCount = 0, downloadUrl = '') {
+        // Store the book ID for use by the add to shelf button
+        document.getElementById("book-title").innerText = title;
+        document.getElementById("book-author").innerText = author;
+
+        // Check if genre element exists
+        const genreElement = document.getElementById("book-genre");
+        if (genreElement) genreElement.innerText = genre || "Unknown";
+
+        document.getElementById("book-description").innerText = description || "No description available.";
+        document.getElementById("book-image").src = imageUrl || "../static/placeholder_book.jpg";
+
+        // Set up download button
+        const downloadBtn = document.getElementById("download-btn");
         if (downloadBtn) {
             downloadBtn.onclick = () => {
                 if (downloadUrl) window.open(downloadUrl, '_blank');
-                else alert("Download not available.");
             };
         }
 
-        const addBtn = document.getElementById('add-to-shelf-btn');
-        const removeBtn = document.getElementById('remove-from-shelf');
+        // Set up the add to shelf button
+        const addToShelfBtn = document.getElementById("add-to-shelf-btn");
+        if (addToShelfBtn) {
+            addToShelfBtn.onclick = () => addBookToShelf(bookId);
+        }
 
-        if (addBtn) addBtn.onclick = () => addBookToShelf(id);
-        if (removeBtn) removeBtn.onclick = () => removeBookFromShelf(id);
+        // Show the modal
+        document.getElementById("book-modal").style.display = "block";
     }
+
 
     function closeBookModal() {
         const modal = document.getElementById('book-modal') || document.getElementById('shelf-modal');
@@ -225,43 +291,50 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function addBookToShelf(bookId) {
-        if (!currentUser) return alert('Please log in to add books.');
+        if (!bookId) {
+            console.error("No book ID available");
+            alert("Error: No book selected");
+            return;
+        }
 
         try {
-            const res = await fetch('/api/add-to-shelf', {
+            const res = await fetch('/addToShelf', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username: currentUser, bookId })
+                body: JSON.stringify({ book_id: bookId })
             });
 
             const data = await res.json();
-            if (data.success) {
-                alert('Book added!');
+
+            if (res.ok) {
+                alert('Book added to your shelf!');
                 closeBookModal();
             } else {
-                alert(data.message || 'Failed to add book');
+                alert(data.message || 'Failed to add book to shelf');
             }
         } catch (err) {
             console.error('Add error:', err);
-            alert('Error adding book');
+            alert('Error adding book to shelf');
         }
     }
 
     async function removeBookFromShelf(bookId) {
-        if (!currentUser) return alert('Please log in to manage your shelf.');
-
         try {
             const res = await fetch('/api/remove-from-shelf', {
                 method: 'DELETE',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username: currentUser, bookId })
+                body: JSON.stringify({ bookId })
             });
 
             const data = await res.json();
             if (data.success) {
                 alert('Book removed');
                 closeBookModal();
-                loadUserShelf(currentUser);
+                // Use session username
+                const username = sessionStorage.getItem('username');
+                if (username) {
+                    loadUserShelf(username);
+                }
             } else {
                 alert(data.message || 'Failed to remove');
             }
@@ -274,5 +347,5 @@ document.addEventListener('DOMContentLoaded', () => {
     // Global exposure
     window.openBookModal = openBookModal;
     window.closeBookModal = closeBookModal;
+    window.addBookToShelf = addBookToShelf;
 });
-
