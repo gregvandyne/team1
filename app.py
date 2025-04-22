@@ -10,7 +10,7 @@ bcrypt = Bcrypt(app)
 app.secret_key = secrets.token_hex(16)  # Generate a random secret key for sessions
 
 # -------- DATABASE CONNECTION --------
-DATABASE_URL = os.environ.get("DATABASE_URL")
+DATABASE_URL = os.environ.get("DATABASE_URL", "postgresql://neondb_owner:npg_SJNojOlDZ37x@ep-dry-wildflower-a8ojs434-pooler.eastus2.azure.neon.tech/neondb?sslmode=require")
 
 if not DATABASE_URL:
     raise ValueError("🚨 DATABASE_URL environment variable not set.")
