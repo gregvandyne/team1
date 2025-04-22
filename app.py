@@ -233,9 +233,10 @@ def createAccount():
         return render_template('createAccount.html')
 
     try:
-        data = request.get_json(force=True)
-    except:
-        data = request.form
+        if request.is_json:
+            data = request.get_json()
+        else:
+            data = request.form
 
         username = data['username']
         email = data['email']
@@ -244,28 +245,27 @@ def createAccount():
         print("📥 Creating account with:")
         print(f"Username: {username}, Email: {email}")
 
-        try:
-            cursor.execute('SELECT * FROM "PRIVATE"."USERS" WHERE "userUsername" = %s OR "userEmail" = %s', (username, email))
-            existing_user = cursor.fetchone()
-            print("👀 Existing user check:", existing_user)
+        cursor.execute('SELECT * FROM "PRIVATE"."USERS" WHERE "userUsername" = %s OR "userEmail" = %s', (username, email))
+        existing_user = cursor.fetchone()
+        print("👀 Existing user check:", existing_user)
 
-            if existing_user:
-                return render_template('createAccount.html', error="Username or email already exists.")
+        if existing_user:
+            return jsonify({"success": False, "message": "Username or email already exists."})
 
-            hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
-            print("🔐 Hashed password:", hashed_password)
+        hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
+        print("🔐 Hashed password:", hashed_password)
 
-            cursor.execute(
-                'INSERT INTO "PRIVATE"."USERS" ("userUsername", "userEmail", "hashPassword") VALUES (%s, %s, %s)',
-                (username, email, hashed_password)
-            )
-            conn.commit()
-            print("✅ Account created successfully")
-            return redirect(url_for('login'))
+        cursor.execute(
+            'INSERT INTO "PRIVATE"."USERS" ("userUsername", "userEmail", "hashPassword") VALUES (%s, %s, %s)',
+            (username, email, hashed_password)
+        )
+        conn.commit()
+        print("✅ Account created successfully")
+        return jsonify({"success": True, "message": "Account created successfully!"})
 
-        except Exception as e:
-            print("❌ Error creating account:", e)
-            return render_template('createAccount.html', error="Failed to create account.")
+    except Exception as e:
+        print("❌ Error creating account:", e)
+        return jsonify({"success": False, "message": "Failed to create account."})
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
