@@ -227,7 +227,7 @@ def featured():
 def collection():
     return render_template('collection.html')
 
-@app.route('/create-account', methods=['GET', 'POST'])
+@app.route('/createAccount', methods=['GET', 'POST'])
 def createAccount():
     if request.method == 'GET':
         return render_template('createAccount.html')
