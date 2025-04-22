@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LitFlix</title>
+    <link rel="stylesheet" href="../static/styles.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="/home" class="logo">LITFLIX</a>
+            <div class="search-container">
+            <form action="/searchPage" method="GET">
+                <input id="search-input" type="text" name="q" placeholder="Search by Genre, Author, or Title">
+                <button type="submit" class="search-btn">🔍</button>
+                </form>
+            </div>
+            <a href="/myShelf" class="my-shelf-btn">My Shelf</a>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero-content">
+            <h1>EDITOR'S PICKS</h1> 
+            <div class="library-boxes">
+                <% featuredSections.forEach((section, index) => { %>
+                     <div class="library-box <%= index === 1 ? 'active' : '' %>">
+                        <h2><%= section.section_name %></h2>
+                    </div>
+                <% }) %>
+             </div>
+        </section>
+        
+
+        <!-- Continue Reading, sectionID=1  -->
+        <section class="book-row">
+            <h2>Continue Reading</h2>
+            <div class="book-list">
+                <% booksBySection['1'] && booksBySection['1'].forEach(book => { %> 
+                    <div class="book" data-book-id="<%= book.id %>">
+                        <img src="<%= book.cover_image_url %>" alt="<%= book.title %>">
+                        <p><%= book.title %></p>
+                    </div>
+                <% }) %>
+            </div>
+        </section>
+        
+        <!-- New to Our Shelves, sectionID=2 -->
+        <section class="book-row">
+            <h2>New to Our Shelves</h2>
+            <div class="book-list">
+                <% booksBySection['2'] && booksBySection['2'].forEach(book => { %> 
+                    <div class="book" data-book-id="<%= book.id %>">
+                        <img src="<%= book.cover_image_url %>" alt="<%= book.title %>">
+                        <p><%= book.title %></p>
+                    </div>
+                <% }) %>
+            </div>
+        </section>
+        
+        <!-- Science Fiction & Fantasy, sectionID=3  -->
+        <section class="book-row">
+            <h2>Science Fiction & Fantasy</h2>
+            <div class="book-list" >
+                <% booksBySection['3'] && booksBySection['3'].forEach(book => { %> 
+                    <div class="book" data-book-id="<%= book.id %>">
+                        <img src="<%= book.cover_image_url %>" alt="<%= book.title %>">
+                        <p><%= book.title %></p>
+                    </div>
+                <% }) %>
+            </div>
+        </section>
+
+        <!-- Mystery & Thriller, sectionID=4  -->
+        <section class="book-row">
+            <h2>Mystery & Thriller</h2>
+            <div class="book-list">
+                <% booksBySection['4'] && booksBySection['4'].forEach(book => { %> 
+                    <div class="book" data-book-id="<%= book.id %>">
+                        <img src="<%= book.cover_image_url %>" alt="<%= book.title %>">
+                        <p><%= book.title %></p>
+                    </div>
+                <% }) %>
+            </div>
+        </section>
+        
+        <!-- Biographies & Memoirs, sectionID=5  -->
+        <section class="book-row">
+            <h2>Biographies & Memoirs</h2>
+            <div class="book-list">
+                <% booksBySection['5'] && booksBySection['5'].forEach(book => { %> 
+                    <div class="book" data-book-id="<%= book.id %>">
+                       <img src="<%= book.cover_image_url %>" alt="<%= book.title %>">
+                        <p><%= book.title %></p>
+                    </div>
+                <% }) %>
+            </div>
+        </section>
+       
+
+
+        <!-- Modal Window -->
+<div id="book-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <div class="modal-body">
+            <img id="book-image" class="modal-book-image" src="" alt="Book Image">
+            <div class="book-details">
+                <h2 id="book-title"></h2>
+                <p><strong>Author:</strong> <span id="book-author"></span></p>
+                <p><strong>Genre:</strong> <span id="book-genre"></span></p>
+                <p><strong>Description:</strong> <span id="book-description"></span></p>
+                <div class="modal-actions">
+                    <button id="add-to-shelf-btn">Add to My Shelf</button>
+                    <button id="download-btn">Download</button>
+                    <button id="close-modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+    </main>
+
+    <script src="../static/script.js"></script>
+</body>
+</html>

@@ -1,8 +1,41 @@
+// static/script.js
 document.addEventListener('DOMContentLoaded', () => {
+    console.log("Script Loaded Successfully!");
+
     // Book Hover Effect
     document.querySelectorAll('.book').forEach(book => {
-        book.addEventListener('mouseenter', () => book.style.transform = 'scale(1.05)');
-        book.addEventListener('mouseleave', () => book.style.transform = 'scale(1)');
+        book.addEventListener('click', async function (e) {
+            e.stopPropagation();
+            const bookId = this.dataset.bookId || "1"; //  to test ID
+            console.log('Book ID:', bookId); 
+
+            if (!bookId) {
+                console.error('Book ID is missing.');
+                return;
+            }
+
+            const modal = document.getElementById('book-modal');
+            if (!modal) {
+                console.error('Modal element not found');
+                return;
+            }
+            
+            modal.style.display = 'block';
+
+            try {
+                // Corrected fetch URL with the bookId parameter
+                const response = await fetch(`/api/books/${bookId}`);
+                const bookData = await response.json();
+
+                document.getElementById('book-image').src = bookData.cover_image_url;
+                document.getElementById('book-title').textContent = bookData.title;
+                document.getElementById('book-author').textContent = bookData.author;
+                document.getElementById('book-genre').textContent = bookData.genre;
+                document.getElementById('book-description').textContent = bookData.description;
+            } catch (error) {
+                console.error('Error fetching book data:', error);
+            }
+        });
     });
 
     // Horizontal Scrolling for Book Lists
@@ -29,7 +62,15 @@ document.addEventListener('DOMContentLoaded', () => {
         box.addEventListener('click', function () {
             document.querySelectorAll('.library-box').forEach(b => b.classList.remove('active'));
             this.classList.add('active');
-            document.querySelector('.hero-content h1').textContent = this.querySelector('h2').textContent;
+
+            const newTitle = this.querySelector('h2').textContent;
+            const heroTitle = document.querySelector('.hero-content h1');
+
+            if (heroTitle) {
+                heroTitle.textContent = newTitle;
+            } else {
+                console.error('Could not find .hero-content h1');
+            }
         });
     });
 
@@ -63,6 +104,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
+
     // Filter Sidebar Toggle
     const filterSidebar = document.getElementById('filter-sidebar');
     const filterToggle = document.getElementById('filter-toggle');
@@ -70,28 +112,29 @@ document.addEventListener('DOMContentLoaded', () => {
     if (filterToggle && filterSidebar) {
         filterToggle.addEventListener('click', () => {
             filterSidebar.classList.toggle('open');
-            filterToggle.innerHTML = filterSidebar.classList.contains('open') ? '❮' : '❯'; // Change icon direction
+            filterToggle.innerHTML = filterSidebar.classList.contains('open') ? '❮' : '❯'; 
         });
 
         // Close sidebar when clicking outside
         window.addEventListener('click', (event) => {
             if (!filterSidebar.contains(event.target) && event.target !== filterToggle) {
                 filterSidebar.classList.remove('open');
-                filterToggle.innerHTML = '❯'; // Reset icon
+                filterToggle.innerHTML = '❯'; 
             }
         });
     }
 
-    // Apply Filters (Example)
-    document.getElementById('apply-filters')?.addEventListener('click', () => {
-        const filters = {
-            genre: document.getElementById('genre-filter')?.value,
-            author: document.getElementById('author-filter')?.value.trim(),
-            rating: document.getElementById('rating-filter')?.value,
-            year: document.getElementById('year-filter')?.value,
-            format: document.getElementById('format-filter')?.value
-        };
-
+    // Apply Filters
+    const applyFiltersBtn = document.getElementById('apply-filters');
+    if (applyFiltersBtn) {
+        applyFiltersBtn.addEventListener('click', () => {
+            const filters = {
+                genre: document.getElementById('genre-filter')?.value.trim() || '',
+                author: document.getElementById('author-filter')?.value.trim() || '',
+                rating: document.getElementById('rating-filter')?.value || '',
+                year: document.getElementById('year-filter')?.value.trim() || '',
+                format: document.getElementById('format-filter')?.value || ''
+            };
         console.log(`Filters Applied:`, filters);
         alert('Filters Applied! (Functionality can be added here)');
     });
@@ -107,6 +150,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Attach modal functions to global scope for inline `onclick` attributes
     window.openBookModal = openBookModal;
     window.closeBookModal = closeBookModal;
+    });
 });
 
 // Function to navigate to different pages 
