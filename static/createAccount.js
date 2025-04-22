@@ -6,7 +6,7 @@ document.getElementById("createAccountForm").addEventListener("submit", async e 
   const password = e.target.password.value;
 
   try {
-    const resp = await fetch("/create-account", {      
+    const resp = await fetch("/createAccount", {      
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username, email, password })

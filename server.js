@@ -25,6 +25,52 @@ app.set('views', path.join(__dirname, 'templates'));
 // Routes
 app.get('/', (req, res) => res.redirect('/home'));
 
+// Handle account creation (Sign up)
+app.post('/createAccount', async (req, res) => {
+    const { username, email, password } = req.body;
+
+    try {
+        // Check if the username or email already exists
+        const checkQuery = 'SELECT * FROM "PRIVATE"."USERS" WHERE "userUsername" = $1 OR "userEmail" = $2';
+        const result = await pool.query(checkQuery, [username, email]);
+
+        if (result.rows.length > 0) {
+            return res.json({ success: false, message: "Username or email already exists." });
+        }
+
+        // Hash password before storing pw in database
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // Insert the new user into the database, 
+        const insertQuery = 'INSERT INTO "PRIVATE"."USERS" ("userUsername", "userEmail", "userPassword") VALUES ($1, $2, $3)';
+
+        await pool.query(insertQuery, [username, email, hashedPassword]);
+
+        return res.json({ success: true, message: "Account created successfully!" });
+    } catch (error) {
+        if (error.code === '23505') {
+            const checkUsername = 'SELECT 1 FROM "PRIVATE"."USERS" WHERE "userUsername" = $1';
+            const checkEmail = 'SELECT 1 FROM "PRIVATE"."USERS" WHERE "userEmail" = $1';
+
+            const usernameExists = (await pool.query(checkUsername, [username])).rowCount > 0;
+            const emailExists = (await pool.query(checkEmail, [email])).rowCount > 0;
+
+            if (usernameExists && emailExists) {
+                return res.json({ success: false, message: "Username and email already exist." });
+            }
+            else if (usernameExists) {
+                return res.json({ success: false, message: "Username already exists. Choose a different one." });
+            }
+            else if (emailExists) {
+                return res.json({ success: false, message: "Email already exists. Use a different email." });
+            }
+        }
+
+        console.error("Error creating account:", error);
+        return res.json({ success: false, message: "Failed to create account." });
+    }
+});
+
 // Home page with genres
 app.get('/home', async (req, res) => {
   try {
@@ -225,6 +271,27 @@ app.get('/api/books/:gutenberg_id', async (req, res) => {
     console.error('Error fetching book data:', err.message);
     res.status(500).json({ error: 'Internal server error' });
   }
+});
+
+//route for add to shelf
+app.post('/api/add-to-shelf', async (req, res) => {
+    const { username, book_id } = req.body;
+    try {
+        const user = await db.query('SELECT id FROM users WHERE username = $1', [username]);
+        if (!user.rows.length) return res.status(400).json({ success: false, message: 'User not found' });
+
+        const userId = user.rows[0].id;
+
+        await db.query(
+            'INSERT INTO user_shelf (user_id, book_id) VALUES ($1, $2) ON CONFLICT DO NOTHING',
+            [userId, book_id]
+        );
+
+        res.json({ success: true });
+    } catch (err) {
+        console.error('Error adding to shelf:', err);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
 });
 
 // Static render routes

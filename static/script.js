@@ -192,24 +192,56 @@ async function loadUserShelf(username) {
   }
 }
 
-function openBookModal(title, author, genre, description = "No description available.", imageSrc = "", bookId = null, downloads = 0, downloadUrl = "") {
-    const modal = document.getElementById('shelf-modal') || document.getElementById('book-modal');
-    if (modal) {
-        const imgEl = modal.querySelector('.modal-book-img') || modal.querySelector('#book-image');
-        const titleEl = modal.querySelector('#shelf-book-title') || modal.querySelector('#book-title');
-        const authorEl = modal.querySelector('#shelf-book-author') || modal.querySelector('#book-author');
-        const genreEl = modal.querySelector('#shelf-book-genre') || modal.querySelector('#book-genre');
-        const descEl = modal.querySelector('#shelf-book-description') || modal.querySelector('#book-description');
-        const dlEl = modal.querySelector('#shelf-book-downloads');
+let selectedBook = {};
 
-        if (imgEl) imgEl.src = imageSrc || '/static/placeholder_book.jpg';
-        if (titleEl) titleEl.textContent = title;
-        if (authorEl) authorEl.textContent = author;
-        if (genreEl) genreEl.textContent = genre;
-        if (descEl) descEl.textContent = description;
-        if (dlEl) dlEl.textContent = downloads;
+async function addToShelf() {
+    if (!currentUser || !selectedBook || !selectedBook.id) {
+        alert("Login required or book data missing.");
+        return;
+    }
 
-        if (bookId) modal.dataset.bookId = bookId;
+    const payload = {
+        username: currentUser,
+        book_id: selectedBook.id
+    };
+
+    try {
+        const response = await fetch('/api/add-to-shelf', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        });
+
+        const data = await response.json();
+        if (data.success) {
+            alert("Book added to your shelf!");
+        } else {
+            alert("Failed to add book: " + (data.message || "Unknown error"));
+        }
+    } catch (err) {
+        console.error('addToShelf error:', err);
+        alert("Something went wrong while adding to shelf.");
+    }
+}
+
+function openBookModal(title, author, genre, description, imageUrl, id = null, downloadCount = 0, downloadUrl = null) {
+    selectedBook = { title, author, genre, description, imageUrl, id, downloadCount, downloadUrl };
+
+        document.getElementById('book-title').textContent = title;
+        document.getElementById('book-author').textContent = author;
+        document.getElementById('book-description').textContent = description || 'No description available.';
+        document.getElementById('book-image').src = imageUrl;
+
+        document.getElementById('book-modal').style.display = 'block';
+
+        const modal = document.getElementById('book-modal');
+        if (!modal) {
+            console.error("Modal element not found!");
+            return;
+        }
+
 
         // ✅ Download button logic
         const downloadBtn = modal.querySelector('#download-btn');
@@ -224,18 +256,17 @@ function openBookModal(title, author, genre, description = "No description avail
         }
 
         const addToShelfBtn = document.getElementById('add-to-shelf-btn');
-        if (addToShelfBtn && bookId) {
-            addToShelfBtn.onclick = () => addBookToShelf(bookId);
+        if (addToShelfBtn && id) {
+            addToShelfBtn.onclick = () => addBookToShelf(id);
         }
 
         const removeFromShelfBtn = document.getElementById('remove-from-shelf');
-        if (removeFromShelfBtn && bookId) {
-            removeFromShelfBtn.onclick = () => removeBookFromShelf(bookId);
+        if (removeFromShelfBtn && id) {
+            removeFromShelfBtn.onclick = () => removeBookFromShelf(id);
         }
 
         modal.style.display = 'flex';
     }
-}
 
 // Function to close the book modal
 function closeBookModal() {

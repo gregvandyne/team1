@@ -1,27 +1,31 @@
-//login Page js code
-const loginForm = document.getElementById("loginForm");
-loginForm.onsubmit = async e => {
-  e.preventDefault();
-  const username = e.target.uname.value;
-  const password = e.target.psw.value;
+﻿//login Page js code
+const loginForm = document.querySelector('#loginForm'); // Adjust this to your form's ID
 
-  try {
+loginForm.onsubmit = async (e) => {
+    e.preventDefault();  // Prevent the default form submission
+
+    const username = document.querySelector('#username').value;
+    const password = document.querySelector('#password').value;
+
     const resp = await fetch("/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, password })
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            username,
+            password
+        })
     });
-    const result = await resp.json();
-    if (result.success) {
-      // store for future API calls
-      localStorage.setItem("currentUser", username);
-      window.location.href = "/myShelf";
-    } else {
-      alert("Invalid username or password");
-    }
-  } catch(err) {
-    console.error(err);
-    alert("Login error, try again");
-  }
-};
 
+    const data = await resp.json();
+    console.log(data);  // Log the response from Flask
+
+    if (data.success) {
+        // ✅ Redirect to another page
+        window.location.href = "/home";  // Change this to your real target route
+    } else {
+        // ❌ Show error message
+        alert(data.message);
+    }
+};

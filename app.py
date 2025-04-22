@@ -1,11 +1,13 @@
-from flask import Flask, render_template, request, jsonify, redirect, url_for
+from flask import Flask, render_template, request, jsonify, redirect, url_for, session
 from flask_bcrypt import Bcrypt
 import psycopg2
 import os
 import random
+import secrets
 
 app = Flask(__name__)
 bcrypt = Bcrypt(app)
+app.secret_key = secrets.token_hex(16)  # Generate a random secret key for sessions
 
 # -------- DATABASE CONNECTION --------
 DATABASE_URL = os.environ.get("DATABASE_URL")
@@ -217,7 +219,13 @@ def searchPage():
 # Other routes remain unchanged
 @app.route('/myShelf')
 def myShelf():
-    return render_template('myShelf.html')
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+    
+    username = session.get('username')
+    print("Username:",username)
+
+    return render_template('myShelf.html', username=username)
 
 @app.route('/featured')
 def featured():
@@ -227,7 +235,7 @@ def featured():
 def collection():
     return render_template('collection.html')
 
-@app.route('/create-account', methods=['GET', 'POST'])
+@app.route('/createAccount', methods=['GET', 'POST'])
 def createAccount():
     if request.method == 'GET':
         return render_template('createAccount.html')
@@ -262,11 +270,12 @@ def createAccount():
             )
             conn.commit()
             print("✅ Account created successfully")
-            return redirect(url_for('login'))
+            return jsonify({"success": True, "message": "Account created successfully"})
 
         except Exception as e:
             print("❌ Error creating account:", e)
             return render_template('createAccount.html', error="Failed to create account.")
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -274,26 +283,59 @@ def login():
         return render_template('loginPage.html')
 
     if request.method == 'POST':
-        if request.is_json:
-            data = request.get_json()
-            username = data['username']
-            password = data['password']
-        else:
-            data = request.form
-            username = data['uname']
-            password = data['psw']
-
+        print("Login request received")
         try:
-            cursor.execute('SELECT * FROM "PRIVATE"."USERS" WHERE "userUsername" = %s', (username,))
+            if request.is_json:
+                data = request.get_json()
+                print("JSON data received:", data)
+                username = data.get('username')
+                password = data.get('password')
+            else:
+                print("Form data received:", request.form)
+                username = request.form.get('username')
+                password = request.form.get('password')
+
+            print(f"Login attempt for username: {username}")
+
+            if not username or not password:
+                return jsonify({"success": False, "message": "Missing username or password."}), 400
+
+            # Use the existing connection instead of creating a new one
+            cursor = conn.cursor()
+            print("Executing database query...")
+            cursor.execute('SELECT "userUsername", "userEmail", "hashPassword" FROM "PRIVATE"."USERS" WHERE "userUsername" = %s', (username,))
+
             user = cursor.fetchone()
+            print(f"User found: {user is not None}")
 
-            if not user or not bcrypt.check_password_hash(user[2], password):
-                return render_template('loginPage.html', error="Invalid username or password.")
-
-            return redirect(url_for('myShelf'))
+            if not user:
+                return jsonify({"success": False, "message": "Invalid username or password."}), 401
+                
+            print("Checking password...")
+            if not user[2] or not bcrypt.check_password_hash(user[2], password):
+                return jsonify({"success": False, "message": "Invalid username or password."}), 401
+            
+                    # Store user information in the session
+            session['logged_in'] = True
+            session['username'] = user[0]  # userUsername
+            session['email'] = user[1]     # userEmail
+        
+            print("Login successful!")
+            return jsonify({"success": True, "message": "Login successful"}), 200
+            
         except Exception as e:
-            print("Error:", e)
-            return render_template('loginPage.html', error="Server error. Please try again later.")
+            print("Login error:", str(e))
+            import traceback
+            traceback.print_exc()
+            return jsonify({"success": False, "message": "Server error. Please try again later."}), 500
+
+@app.route('/logout')
+def logout():
+    # Clear the session
+    session.clear()
+    return redirect(url_for('home'))
+        
+
 
 if __name__ == '__main__':
     print("🚀 Flask server is starting...")

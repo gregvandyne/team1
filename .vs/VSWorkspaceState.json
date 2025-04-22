@@ -1,9 +1,9 @@
 {
   "ExpandedNodes": [
     "",
-    "\\createAccount",
-    "\\loginPage",
-    "\\wikiBooks_db"
+    "\\static",
+    "\\templates"
   ],
+  "SelectedNode": "\\.gitignore",
   "PreviewInSolutionExplorer": false
 }
