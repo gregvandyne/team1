@@ -95,7 +95,7 @@
     - Book format information (PDF, EPUB, etc.)
     - User annotations and highlights
     - Reading statistics (books completed, pages read, reading streaks)
-- **Link Destination:** /myshelf
+- **Link Destination:** /myShelf
 - **List of Tests for Render:**
     ✅ Page loads successfully with an active session
     ✅ Correct display of saved books
@@ -135,7 +135,7 @@
     - Search analytics data (popular searches, trending books)
     - Faceted search aggregations (count of books per genre, author, etc.)
 
-- **Link Destination:** /searchresults
+- **Link Destination:** /searchPage
 - **List of Tests for Render:**
     ✅ Page loads successfully
     ✅ Search input accepts strings and submits data
@@ -221,7 +221,7 @@
     - Collection history (previous versions, updates)
     - User's shelf data (to indicate which books are already saved)
     - Collection availability information (limited time, permanent)
-- **Link Destination:** /featured/collection
+- **Link Destination:** /collection
 - **List of Tests for Render:**
     ✅ Page loads successfully with an active session
     ✅ Display of collection title and description
