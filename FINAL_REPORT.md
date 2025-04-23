@@ -1,26 +1,36 @@
 # Final Report for "LitFlix" (Team 1)
+
 ---
+
 ## Team 1 Members: 
-Talia Betourney
-Jason Wells
-Clayton Braden
-Greg Vandyne
+- Talia Betourney
+- Jason Wells
+- Clayton Braden
+- Greg Vandyne
+  
 ---
+
 ## Public Hosting Site:
 https://team1-jf5l.onrender.com/home
+
 ---
+
 ## Version Control Repository Link:
 https://github.com/gregvandyne/team1
+
 ---
 ## Project Tracking Link:
 https://cspb3308-team1.atlassian.net/jira/core/projects/CS3308/board
-*This project tracking software had little buy-in from team members, so the Product Manager (Talia) switched to weekly email blasts to the team, and all features/bugs for the week were discussed in that week's email thread.*
+- This project tracking software had little buy-in from team members, so the Product Manager (Talia) switched to weekly email blasts to the team, and all features/bugs for the week were discussed in that week's email thread.
+
 ---
 ## Demo Video:
 https://o365coloradoedu-my.sharepoint.com/:v:/g/personal/tabe8206_colorado_edu/Eea0zEGn43ROjru-ubS3SM4B2C9KQRVqkh3kJ_yz28gFgA?e=qKk63e
+
 ---
 ## Presentation Materials:
 https://www.canva.com/design/DAGlSla9mrQ/qMyHcY2l20HKznquhRrxlQ/edit?utm_content=DAGlSla9mrQ&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton
+
 ---
 
 ## Completed Features:
@@ -85,6 +95,6 @@ https://www.canva.com/design/DAGlSla9mrQ/qMyHcY2l20HKznquhRrxlQ/edit?utm_content
 
 ---
 
-# Challenges & Methodology Reflection: 
+## Challenges & Methodology Reflection: 
 
 ---
