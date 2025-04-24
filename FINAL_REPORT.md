@@ -164,7 +164,7 @@ https://www.canva.com/design/DAGlSla9mrQ/qMyHcY2l20HKznquhRrxlQ/edit?utm_content
  
 *Reflection*
 
--The team came together as expected and overcame many differences to produce a functional system that can be easily expanded on. As with all group projects, the productivity and output is a reflection of the desire/cohesion of the group and we came together to accomplish a reasonable version of the intended final project.  
+- The team came together as expected and overcame many differences to produce a functional system that can be easily expanded on. As with all group projects, the productivity and output is a reflection of the desire/cohesion of the group and we came together to accomplish a reasonable version of the intended final project.  
 
   
 
