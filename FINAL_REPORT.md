@@ -152,7 +152,20 @@ https://www.canva.com/design/DAGlSla9mrQ/qMyHcY2l20HKznquhRrxlQ/edit?utm_content
       others to test, a mock feature or dataset should be created that use
 - Challenge #2: The work of many members depended on having others work completed before them and almost felt as if a waterfall a
   approach may have been more effecient (for example, the HTML code was written but depended on a working database to actually
-  collect information
-  -
+  collect information)
+     - Solution: changing to a waterfall method to allow for more consistent flow of output along with increased communication
+- Challenge #3: There were differing levels of ability and skill that presented as roadblocks to the progression of the project secondary to what was 
+   mentioned before.
+    - Solution: Changing the manner that the information was distributed/processed would have allowed there to be better flow of the output. Increased 
+     communication would have made this process easier
+- Challenge #4: Developmental conflicts with the front and back end design. We were able to reconcile these differences before the completion of the term but
+    it did lead to duplicated work/increased time for proper integration.
+    - Solution: Setting the ground rules in the beginning and continued communication throughout the project
+ 
+*Reflection*
+
+-The team came together as expected and overcame many differences to produce a functional system that can be easily expanded on. As with all group projects, the productivity and output is a reflection of the desire/cohesion of the group and we came together to accomplish a reasonable version of the intended final project.  
+
+  
 
 ---
