@@ -93,8 +93,52 @@ https://www.canva.com/design/DAGlSla9mrQ/qMyHcY2l20HKznquhRrxlQ/edit?utm_content
 
 ## Tool & Technology Reflection:
 
+### Backend/Database
+*Flask:*
+- Flask was used as the primary backend framework for routing, templating, and handling API communications with the Node.js server. It met our needs in that we were all familiar with how to use Flask from the course's labwork. We did have to use an external library, psycopg2, for database communication and management. Though we were all familiar with Flask, it would have been a better/simpler option to run all server operations from our Node.js server.
+
+*Node.js:* 
+- Node.js was used for database queries and managing real-time interactions, like user login and account creation. It integrated well with PostgreSQL, so our needs were met. We could have used this tool better by improving team communication and not duplicating functionality across two servers. This introduced a lot of opportunities for conflicts and complex bugs.
+
+*PostgreSQL:* 
+- PostgreSQL served as our relational database for storing book data and user account data. It met our needs, and we did not feel like a NoSQL database would have been a better approach to data management. 
+
+### Frontend
+*HTML, CSS, Javascript:* 
+- These are the standard technologies for structuring/styling websites, adding interactivity, etc. and we didn't want to overcomplicate development by trying to learn a new frontend framework on the fly. If we were to reapproach the project, we may go with something like React or Vue so we could reuse some of our components, like the book modal or the advanced filter drawer from the search page. 
+
+*EJS (Embedded JavaScript)*: 
+- We used EJS for rendering dynamic HTML content on the server side. To make better use of this tool, we would've started with the pages as EJS files, rather than having to revise them from static HTML later on in development.
+
+### Version Control, APIs and Project Management Resources
+*Visual Studio Code:* 
+- VS Code is the IDE we used for actually writing out the code. We had no issues using it for debugging, developing, and managing the codebase. To better use the tool for our project, we should have shared our workspace configurations with team members to ensure no issues arose from inconsistensies there. 
+
+*Git/GitHub:* 
+- We used Git and Github for all of the project's version control. If we were to start the project over, we would still use these tools because they made it easy to manage our branches, work on features separately, and roll back buggy code when needed. To use this tool better in the future, we could be stricter with how we approached branching and pushing code to main.
+
+*Canva:* 
+- We used this tool for making site mock-ups as well as our presentation slide deck. It was fine; the materials looked nice and the UI was user-friendly. If we restarted the project, I might try using Figma instead since it's more suited to web page design than Canva.
+
+*Project Gutenberg API:*
+- This was our source of public domain books which we used for book data, including links to the complete book files. This was a huge dataset and we probably bit off a bit more than we could chew; we needed a lot more time for data cleaning because there was a ton of inconsistent formatting. If we reapproached this, we would still use this API, but pull in a smaller portion and figure out how we need to clean/format it before taking in all 70,000 books at once. 
+
+*Render:* 
+- This was the cloud platform we used for deploying the Flask and Node.js servers. We were all familiar with the deployment process on Render from the class labwork and it offered a 'free' tier, so this was a straightforward choice for us. Because of our weird double-server set up, it took a little time to figure out how to set up our requirements.txt file, but that was the fault of our application and not Render. 
+
+*Neon.tech:*
+- This was our PostgreSQL database host. We chose it because it was fairly straightforward to set up and met our needs for cloud-hosting our database. It was nice that they offer a 'free' tier, which is what we used, but the resources were pretty limited without a 'premium' subscription. That seemed pretty universal though; we didn't find a lot of other options that would give us better features and performance without a cost (i.e. AWS and Google Cloud). We would likely use this same tool again. 
+
+*Jira:*
+- We initially planned to use Jira for project management but switched to weekly email updates due to low team engagement with the tool.
 ---
 
 ## Challenges & Methodology Reflection: 
+
+*Challenges*
+
+
+*How We'd Do Things Differently*
+
 
 ---
