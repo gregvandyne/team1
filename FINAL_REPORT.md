@@ -47,6 +47,7 @@ https://www.canva.com/design/DAGlSla9mrQ/qMyHcY2l20HKznquhRrxlQ/edit?utm_content
 - Designed and populated tables for books, authors, genres, and user data.
 - Added genre assignment logic for books based on keywords in titles.
 - Implemented queries for retrieving books, authors, and genres efficiently.
+- Utilized APIs to fetch data and customize data based on user needs.
 
 **Deployment:**
 - Deployed the application on Render with render.yaml for configuration.
@@ -131,6 +132,11 @@ https://www.canva.com/design/DAGlSla9mrQ/qMyHcY2l20HKznquhRrxlQ/edit?utm_content
 
 *Jira:*
 - We initially planned to use Jira for project management but switched to weekly email updates due to low team engagement with the tool.
+- Devoloped Python code to fetch data using Project Gutenberg's APIs and store into a local database.
+- Parsed HTML and XML for cover images using external Python libraries (BeutifulSoup).
+- Stored and collected data into a PostgreSQL database utilizing Django models and migrations.
+- Used DJANGO ORM to manage foreign keys and various relationships (many to many, one to many, one to one, etc.)
+- Implemented session management (built in Flask object) to verify user authenticity and store user data (books)
 ---
 
 ## Challenges & Methodology Reflection: 
@@ -140,5 +146,13 @@ https://www.canva.com/design/DAGlSla9mrQ/qMyHcY2l20HKznquhRrxlQ/edit?utm_content
 
 *How We'd Do Things Differently*
 
+- Challenge #1: We did not set enough time aside for testing. And ended up having several bugs that could have been corrected
+  if properly tested while it was implemented rather than at the end of the project. 
+    - Solution: Moving forward, adequate time should be allocated for unit testing as well as final. Additionally, if certain features are needed for
+      others to test, a mock feature or dataset should be created that use
+- Challenge #2: The work of many members depended on having others work completed before them and almost felt as if a waterfall a
+  approach may have been more effecient (for example, the HTML code was written but depended on a working database to actually
+  collect information
+  -
 
 ---
