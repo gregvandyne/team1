@@ -138,11 +138,6 @@ many-to-many (authors to genres) to provide additional search support.
 
 *Jira:*
 - We initially planned to use Jira for project management but switched to weekly email updates due to low team engagement with the tool.
-- Devoloped Python code to fetch data using Project Gutenberg's APIs and store into a local database.
-- Parsed HTML and XML for cover images using external Python libraries (BeutifulSoup).
-- Stored and collected data into a PostgreSQL database utilizing Django models and migrations.
-- Used DJANGO ORM to manage foreign keys and various relationships (many to many, one to many, one to one, etc.)
-- Implemented session management (built in Flask object) to verify user authenticity and store user data (books)
 ---
 
 ## Challenges & Methodology Reflection: 
