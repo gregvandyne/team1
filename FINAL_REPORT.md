@@ -102,7 +102,12 @@ https://www.canva.com/design/DAGlSla9mrQ/qMyHcY2l20HKznquhRrxlQ/edit?utm_content
 - Node.js was used for database queries and managing real-time interactions, like user login and account creation. It integrated well with PostgreSQL, so our needs were met. We could have used this tool better by improving team communication and not duplicating functionality across two servers. This introduced a lot of opportunities for conflicts and complex bugs.
 
 *PostgreSQL:* 
-- PostgreSQL served as our relational database for storing book data and user account data. It met our needs, and we did not feel like a NoSQL database would have been a better approach to data management. 
+- PostgreSQL served as our relational database for storing book data and user account data. It met our needs, and we did not feel like a NoSQL database would have been a better approach to data management.
+
+- *Django ORM:*
+- The database was built locally using Django, a python web framework with many capabilities including creating databases.
+Django provided the capability of setting relationships such as many-to-one (authors to books), one-to-one (book to title), or
+many-to-many (authors to genres) to provide additional search support.
 
 ### Frontend
 *HTML, CSS, Javascript:* 
@@ -121,11 +126,12 @@ https://www.canva.com/design/DAGlSla9mrQ/qMyHcY2l20HKznquhRrxlQ/edit?utm_content
 *Canva:* 
 - We used this tool for making site mock-ups as well as our presentation slide deck. It was fine; the materials looked nice and the UI was user-friendly. If we restarted the project, I might try using Figma instead since it's more suited to web page design than Canva.
 
-*Project Gutenberg API:*
-- This was our source of public domain books which we used for book data, including links to the complete book files. This was a huge dataset and we probably bit off a bit more than we could chew; we needed a lot more time for data cleaning because there was a ton of inconsistent formatting. If we reapproached this, we would still use this API, but pull in a smaller portion and figure out how we need to clean/format it before taking in all 70,000 books at once. 
+*Project Gutenberg / Gutendex API:*
+- This was our source of public domain books which we used for book data, including links to the complete book files. This was a huge dataset and we probably bit off a bit more than we could chew; we needed a lot more time for data cleaning because there was a ton of inconsistent formatting. If we reapproached this, we would still use this API, but pull in a smaller portion and figure out how we need to clean/format it before taking in all 70,000 books at once.
+- The API relied on the GutEndex repository, an unofficial third-party repository of APIs created by developers to make working with Project Gutenberg easier. Gutendex provided the Django framework (models.py, settings.py, etc.) to fetch data and build a database from Project Gutenberg
 
 *Render:* 
-- This was the cloud platform we used for deploying the Flask and Node.js servers. We were all familiar with the deployment process on Render from the class labwork and it offered a 'free' tier, so this was a straightforward choice for us. Because of our weird double-server set up, it took a little time to figure out how to set up our requirements.txt file, but that was the fault of our application and not Render. 
+- This was the cloud platform we used for deploying the Flask and Node.js servers. We were all familiar with the deployment process on Render from the class labwork and it offered a 'free' tier, so this was a straightforward choice for us. Because of our weird double-server setup, it took a little time to figure out how to set up our requirements.txt file, but that was the fault of our application and not Render. 
 
 *Neon.tech:*
 - This was our PostgreSQL database host. We chose it because it was fairly straightforward to set up and met our needs for cloud-hosting our database. It was nice that they offer a 'free' tier, which is what we used, but the resources were pretty limited without a 'premium' subscription. That seemed pretty universal though; we didn't find a lot of other options that would give us better features and performance without a cost (i.e. AWS and Google Cloud). We would likely use this same tool again. 
@@ -146,21 +152,16 @@ https://www.canva.com/design/DAGlSla9mrQ/qMyHcY2l20HKznquhRrxlQ/edit?utm_content
 
 *How We'd Do Things Differently*
 
-- Challenge #1: We did not set enough time aside for testing. And ended up having several bugs that could have been corrected
-  if properly tested while it was implemented rather than at the end of the project. 
-    - Solution: Moving forward, adequate time should be allocated for unit testing as well as final. Additionally, if certain features are needed for
-      others to test, a mock feature or dataset should be created that use
-- Challenge #2: The work of many members depended on having others work completed before them and almost felt as if a waterfall a
-  approach may have been more effecient (for example, the HTML code was written but depended on a working database to actually
+- Challenge #1: We did not set enough time aside for testing during and at the end of the project. The final testing ended up having several bugs that were too time-consuming to resolve before the project deadline. Additionally, several bugs may have been caught if properly tested while the feature was initially implemented rather than at the end of the project. Specifically, integration testing, systems testing, and user acceptance testing ended up being done towards the very end of the project.
+    - Solution: Moving forward, adequate time should be allocated for unit and integration testing throughout the entire project. Integration testing should also be done as soon as possible as this can be the most difficult part in software development. Additionally, if certain features are needed before others can begin testing their code, a mock feature or dataset such as a test database could be created to verify functionality.
+- Challenge #2: The work of many members depended on having others' work completed before them and almost felt as if a waterfall a
+  approach may have been more efficient (for example, the HTML code was written but depended on a working database to actually
   collect information)
-     - Solution: changing to a waterfall method to allow for more consistent flow of output along with increased communication
-- Challenge #3: There were differing levels of ability and skill that presented as roadblocks to the progression of the project secondary to what was 
-   mentioned before.
-    - Solution: Changing the manner that the information was distributed/processed would have allowed there to be better flow of the output. Increased 
-     communication would have made this process easier
-- Challenge #4: Developmental conflicts with the front and back end design. We were able to reconcile these differences before the completion of the term but
-    it did lead to duplicated work/increased time for proper integration.
-    - Solution: Setting the ground rules in the beginning and continued communication throughout the project
+     - Solution: Our agile approach could have been modified to understand the needs and dependencies of other features and delegate tasks. For instance, we needed a database so our website could output real data, but it took longer than expected to get the database built. Agile could have been modified here so team members collectively work on setting up a database before diving into the front-end content. Alternatively, the approach could have been modified so a test database was created as one of the first tasks. This would allow the backend designers a goal on what data needs to be collected, and the front-end designers the ability to use this test database for proper integration testing.
+- Challenge #3: There were differing levels of ability and skill that presented as roadblocks to the progression of the project secondary to what was mentioned before.
+    - Solution: Changing the manner in which the information was distributed/processed would have allowed there to be a better flow of the output. Increased communication may have made this process easier. Additionally, using paired programming likely could have bridged the gap of skills across members as some members were more skilled in SQL while others had more experience in HTML. Paired programming may have made integrations easier with an SQL-experienced programmer and a Python-experienced programmer working together. However, this was difficult in our situation where all members have full-time jobs/commitments and all members are in different time zones.
+- Challenge #4: Developmental conflicts with the front and back-end design. We were able to reconcile these differences before the completion of the term but it did lead to duplicated work/increased time for proper integration.
+    - Solution: Integration testing was not performed until the end of the project and the difficulty of integrating the front-end and back-end was not quite understood until attempted. As mentioned above, paired programming may have reduced the workload as the front-end and back-end were integrated by individual users. By using paired programming, knowledge can be more easily distributed and bugs can be more easily identified with 1 person watching while the other writes the code. Additionally, improved communication and staying consistent with a JIRA board or agile meetings would have helped here as roadblocks could have been discovered early on in the process to understand what areas the team is behind in.
  
 *Reflection*
 
